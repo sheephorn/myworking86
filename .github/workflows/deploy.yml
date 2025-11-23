@@ -20,3 +20,4 @@ jobs:
           script: |
             cd /var/www/app
             git pull
+            npm run build
