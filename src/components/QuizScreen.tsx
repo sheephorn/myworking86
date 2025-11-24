@@ -203,7 +203,7 @@ function GeometryDisplay({ geometry }: { geometry: GeometryData }) {
     }
 
     return (
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-2">
             <svg width={viewBoxWidth} height={viewBoxHeight} viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} className="bg-white rounded-xl">
                 {content}
             </svg>
@@ -300,9 +300,9 @@ export default function QuizScreen({ level, onQuizComplete, onGoToTop }: QuizScr
                 </div>
             </div>
 
-            <div className="mb-10 relative">
+            <div className="mb-6 relative">
                 {question.geometry && <GeometryDisplay geometry={question.geometry} />}
-                <div className={`${question.geometry ? 'text-3xl text-slate-500' : 'text-6xl text-slate-800'} font-black tracking-wider`}>
+                <div className={`${question.geometry ? 'text-xs text-slate-300' : 'text-6xl text-slate-800'} font-black tracking-wider`}>
                     {question.text}
                 </div>
 
