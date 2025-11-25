@@ -257,27 +257,29 @@ export default function QuizScreen({ level, onQuizComplete, onGoToTop, showTimer
 
             <div className="flex flex-col">
                 <div className="flex justify-center items-start gap-8">
-                    <div className="flex-1">
-                        <div className="mb-6 relative">
-                            {question.geometry && <GeometryDisplay geometry={question.geometry} />}
-                            <div className={`${question.showCalculationPad ? 'text-5xl' : 'text-6xl'} ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'} font-black tracking-wider min-h-[80px] flex items-center justify-center`}>
-                                {question.text}
-                            </div>
+                    {!question.showCalculationPad &&
+                        <div className="flex-1">
+                            <div className="mb-6 relative">
+                                {question.geometry && <GeometryDisplay geometry={question.geometry} />}
+                                <div className={`${question.showCalculationPad ? 'text-5xl' : 'text-6xl'} ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'} font-black tracking-wider min-h-[80px] flex items-center justify-center`}>
+                                    {question.text}
+                                </div>
 
-                            {/* Feedback Overlay */}
-                            <div
-                                className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${feedback.show ? 'opacity-100' : 'opacity-0'
-                                    }`}
-                            >
-                                <span
-                                    className={`text-8xl filter drop-shadow-lg transform transition-transform duration-300 ${feedback.show ? 'scale-100' : 'scale-0'
-                                        } ${feedback.isCorrect ? 'text-brand-green' : 'text-brand-red'}`}
+                                {/* Feedback Overlay */}
+                                <div
+                                    className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${feedback.show ? 'opacity-100' : 'opacity-0'
+                                        }`}
                                 >
-                                    {feedback.isCorrect ? '⭕' : '❌'}
-                                </span>
+                                    <span
+                                        className={`text-8xl filter drop-shadow-lg transform transition-transform duration-300 ${feedback.show ? 'scale-100' : 'scale-0'
+                                            } ${feedback.isCorrect ? 'text-brand-green' : 'text-brand-red'}`}
+                                    >
+                                        {feedback.isCorrect ? '⭕' : '❌'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
                     {question.showCalculationPad && multiplicationNumbers && (
                         <div className="flex-1">
                             <CalculationPad num1={multiplicationNumbers.num1} num2={multiplicationNumbers.num2} />

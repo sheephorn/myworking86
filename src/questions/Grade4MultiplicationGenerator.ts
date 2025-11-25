@@ -1,6 +1,6 @@
 import { Question } from "../types";
 import { QuestionGenerator } from "./QuestionGenerator";
-import { sample, shuffle } from "lodash";
+import { sample, shuffle } from "../utils/array";
 
 export class Grade4MultiplicationGenerator implements QuestionGenerator {
   generate(): Question {
