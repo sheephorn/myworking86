@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HistoryRecord } from '../types';
 import { formatTime, getMedal } from '../utils/format';
-import { LEVEL_NAMES } from '../constants';
+import { GRADES } from '../constants';
 
 interface HistoryScreenProps {
     history: HistoryRecord[];
@@ -18,6 +18,16 @@ function formatDate(timestamp: number): string {
     const minutes = d.getMinutes().toString().padStart(2, '0');
     return `${year}/${month}/${day} ${hours}:${minutes}`;
 }
+
+const getLevelName = (levelId: string): string => {
+    for (const grade of GRADES) {
+        const level = grade.levels.find(l => l.id === levelId);
+        if (level) {
+            return level.name;
+        }
+    }
+    return levelId;
+};
 
 export default function HistoryScreen({ history, onBack, onClearHistory }: HistoryScreenProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -36,30 +46,40 @@ export default function HistoryScreen({ history, onBack, onClearHistory }: Histo
                     <p className="text-slate-400 font-bold py-8">まだデータがありません</p>
                 ) : (
                     <div className="space-y-3">
-                        {history.map((record, index) => (
-                            <div key={index} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
-                                <div className="text-left">
-                                    <div className="text-xs font-bold text-slate-400 mb-1">
-                                        {formatDate(record.timestamp)}
-                                    </div>
-                                    <div className="font-bold text-slate-600 text-sm">
-                                        {LEVEL_NAMES[record.level] || record.level}
-                                    </div>
-                                </div>
-                                <div className="text-right flex flex-col items-end">
-                                    <div>
-                                        <span className="text-2xl font-black text-brand-orange">{record.score}</span>
-                                        <span className="text-xs font-bold text-slate-400 ml-1">点</span>
-                                    </div>
-                                    {record.time && (
-                                        <div className="text-slate-500 font-mono text-xs mt-1 flex items-center gap-1">
-                                            <span>{getMedal(record.score, record.time)}</span>
-                                            <span>{formatTime(record.time)}</span>
+                        {history.map((record, index) => {
+                            const levelName = getLevelName(record.level);
+                            const gradeName = record.grade ? GRADES.find(g => g.grade === record.grade)?.name : null;
+
+                            return (
+                                <div key={index} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
+                                    <div className="text-left">
+                                        <div className="text-xs font-bold text-slate-400 mb-1">
+                                            {formatDate(record.timestamp)}
                                         </div>
-                                    )}
+                                        {gradeName && (
+                                            <div className="font-bold text-slate-500 text-xs">
+                                                学年: {gradeName}
+                                            </div>
+                                        )}
+                                        <div className="font-bold text-slate-600 text-sm">
+                                            単元: {levelName}
+                                        </div>
+                                    </div>
+                                    <div className="text-right flex flex-col items-end">
+                                        <div>
+                                            <span className="text-2xl font-black text-brand-orange">{record.score}</span>
+                                            <span className="text-xs font-bold text-slate-400 ml-1">点</span>
+                                        </div>
+                                        {record.time && (
+                                            <div className="text-slate-500 font-mono text-xs mt-1 flex items-center gap-1">
+                                                <span>{getMedal(record.score, record.time)}</span>
+                                                <span>{formatTime(record.time)}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
