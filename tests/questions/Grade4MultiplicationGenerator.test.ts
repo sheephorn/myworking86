@@ -5,39 +5,57 @@ describe('Grade4MultiplicationGenerator', () => {
   const generator = new Grade4MultiplicationGenerator();
   const TEST_ITERATIONS = 20;
 
-  it('should generate a valid question object', () => {
-    for (let i = 0; i < TEST_ITERATIONS; i++) {
-      const question = generator.generate();
-      expect(question).toHaveProperty('text');
-      expect(question).toHaveProperty('correctAnswer');
-      expect(question).toHaveProperty('options');
-      expect(question).toHaveProperty('showCalculationPad', true);
-      expect(question).toHaveProperty('num1');
-      expect(question).toHaveProperty('num2');
-    }
+  describe("when answerMode is 'choice'", () => {
+    it('should generate a valid question object with options', () => {
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+        const question = generator.generate('choice');
+        expect(question).toHaveProperty('text');
+        expect(question).toHaveProperty('correctAnswer');
+        expect(question).toHaveProperty('options');
+        expect(question.options).toHaveLength(4);
+        expect(question).toHaveProperty('showCalculationPad', false);
+      }
+    });
+
+    it('should always include the correct answer in the options', () => {
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+        const question = generator.generate('choice');
+        expect(question.options).toContain(question.correctAnswer);
+      }
+    });
+
+    it('should have 4 unique options', () => {
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+        const question = generator.generate('choice');
+        expect(new Set(question.options).size).toBe(4);
+      }
+    });
   });
 
-  it('should always include the correct answer in the options', () => {
-    for (let i = 0; i < TEST_ITERATIONS; i++) {
-      const question = generator.generate();
-      expect(question.options).toContain(question.correctAnswer);
-    }
+  describe("when answerMode is 'calculationPad'", () => {
+    it('should generate a valid question object without options', () => {
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+        const question = generator.generate('calculationPad');
+        expect(question).toHaveProperty('text');
+        expect(question).toHaveProperty('correctAnswer');
+        expect(question.options).toEqual([]);
+        expect(question).toHaveProperty('showCalculationPad', true);
+        expect(question).toHaveProperty('num1');
+        expect(question).toHaveProperty('num2');
+      }
+    });
   });
 
-  it('should have 4 unique options', () => {
+  it('should generate a mathematically correct problem regardless of mode', () => {
     for (let i = 0; i < TEST_ITERATIONS; i++) {
-      const question = generator.generate();
-      expect(question.options).toHaveLength(4);
-      expect(new Set(question.options).size).toBe(4);
-    }
-  });
+      // Test both modes
+      const question1 = generator.generate('choice');
+      const { num1: num1_1, num2: num2_1, correctAnswer: correctAnswer1 } = question1;
+      expect(correctAnswer1).toBe(num1_1! * num2_1!);
 
-  it('should generate a mathematically correct problem', () => {
-    for (let i = 0; i < TEST_ITERATIONS; i++) {
-      const question = generator.generate();
-      // 'num1' and 'num2' should be the source of truth
-      const { num1, num2, correctAnswer } = question;
-      expect(correctAnswer).toBe(num1! * num2!);
+      const question2 = generator.generate('calculationPad');
+      const { num1: num1_2, num2: num2_2, correctAnswer: correctAnswer2 } = question2;
+      expect(correctAnswer2).toBe(num1_2! * num2_2!);
     }
   });
 });
