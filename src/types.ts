@@ -1,41 +1,42 @@
-import { LEVEL_IDS } from './constants';
+import { GRADES } from "./constants";
 
-export type GameLevel = typeof LEVEL_IDS[keyof typeof LEVEL_IDS];
-export type Screen = 'welcome' | 'quiz' | 'result' | 'history' | 'settings';
+export type GameLevel = (typeof GRADES)[number]["levels"][number]["id"];
+export type Screen = "welcome" | "quiz" | "result" | "history" | "settings";
 
 export interface HistoryRecord {
-    timestamp: number;
-    score: number;
-    level: GameLevel;
-    time?: number; // Time taken in milliseconds
+  timestamp: number;
+  score: number;
+  level: GameLevel;
+  time?: number; // Time taken in milliseconds
+  grade?: number;
 }
 
 export interface GeometryData {
-    shape: 'rectangle' | 'triangle' | 'trapezoid';
-    dimensions: {
-        width?: number; // Base for triangle/rectangle, Lower base for trapezoid
-        height?: number;
-        upper?: number; // Upper base for trapezoid
-    };
+  shape: "rectangle" | "triangle" | "trapezoid";
+  dimensions: {
+    width?: number; // Base for triangle/rectangle, Lower base for trapezoid
+    height?: number;
+    upper?: number; // Upper base for trapezoid
+  };
 }
 
 export interface Question {
-    text: string;
-    correctAnswer: number;
-    options: number[];
-    geometry?: GeometryData;
+  text: string;
+  correctAnswer: number;
+  options: number[];
+  geometry?: GeometryData;
 }
 
 export interface GameState {
-    screen: Screen;
-    level: GameLevel;
-    currentQuestionIndex: number;
-    score: number;
-    totalQuestions: number;
-    startTime: number | null;
-    finalTime: number;
+  screen: Screen;
+  level: GameLevel;
+  currentQuestionIndex: number;
+  score: number;
+  totalQuestions: number;
+  startTime: number | null;
+  finalTime: number;
 }
 
 export interface GameSettings {
-    showTimer: boolean;
+  showTimer: boolean;
 }
