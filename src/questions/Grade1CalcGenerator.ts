@@ -29,22 +29,15 @@ export class Grade1CalcGenerator implements QuestionGenerator {
             // Make sure wrong answer is not negative
             if (wrong < 0) wrong = Math.abs(wrong) + 1;
 
-    // Generate options
-    const options = new Set([correctAnswer]);
-    while (options.size < 4) {
-      let wrong = correctAnswer + Math.floor(Math.random() * 10) - 5;
-      // Make sure wrong answer is not negative
-      if (wrong < 0) wrong = Math.abs(wrong) + 1;
+            if (wrong !== correctAnswer) {
+                options.add(wrong);
+            }
+        }
 
-      if (wrong !== correctAnswer) {
-        options.add(wrong);
-      }
+        return {
+            text,
+            correctAnswer,
+            options: Array.from(options).sort(() => Math.random() - 0.5),
+        };
     }
-
-    return {
-      text,
-      correctAnswer,
-      options: Array.from(options).sort(() => Math.random() - 0.5),
-    };
-  }
 }
