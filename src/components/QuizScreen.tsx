@@ -165,9 +165,8 @@ function GeometryDisplay({ geometry }: { geometry: GeometryData }) {
     content = (
       <>
         <polygon
-          points={`${xBottomStart},${yBottom} ${xBottomStart + wBottom},${yBottom} ${xTopStart + wTop},${
-            yTop
-          } ${xTopStart},${yTop}`}
+          points={`${xBottomStart},${yBottom} ${xBottomStart + wBottom},${yBottom} ${xTopStart + wTop},${yTop
+            } ${xTopStart},${yTop}`}
           fill={fillColor}
           stroke={strokeColor}
           strokeWidth="3"
@@ -177,9 +176,8 @@ function GeometryDisplay({ geometry }: { geometry: GeometryData }) {
         <line x1={xTopStart} y1={yTop} x2={xTopStart} y2={yBottom} stroke={strokeColor} strokeWidth="2" strokeDasharray="4 4" />
         {/* Right Angle Marker */}
         <polyline
-          points={`${xTopStart},${yBottom} ${xTopStart + 10},${yBottom} ${xTopStart + 10},${yBottom - 10} ${xTopStart},${
-            yBottom - 10
-          }`}
+          points={`${xTopStart},${yBottom} ${xTopStart + 10},${yBottom} ${xTopStart + 10},${yBottom - 10} ${xTopStart},${yBottom - 10
+            }`}
           fill="none"
           stroke={strokeColor}
           strokeWidth="1"
@@ -274,27 +272,9 @@ export default function QuizScreen({ level, onQuizComplete, onGoToTop, showTimer
     const isCorrect = selected === question.correctAnswer;
     setFeedback({ show: true, isCorrect });
 
-        const nextQuestionDelay = isCorrect ? 500 : 1500;
-
-        setTimeout(() => {
-            setFeedback(prev => ({ ...prev, show: false }));
-            setSelectedAnswer(null);
-            setIsAnswering(false);
-
-            if (currentQuestionIndex >= totalQuestions) {
-                // Quiz complete
-                if (timerIntervalRef.current) {
-                    clearInterval(timerIntervalRef.current);
-                }
-                const finalTime = Date.now() - startTimeRef.current;
-                onQuizComplete(isCorrect ? score + 10 : score, finalTime);
-            } else {
-                // Next question
-                setCurrentQuestionIndex(prev => prev + 1);
-                setQuestion(QuestionFactory.create(level).generate());
-            }
-        }, nextQuestionDelay);
-    };
+    if (isCorrect) {
+      setScore((prev) => prev + 10);
+    }
 
     const nextQuestionDelay = isCorrect ? 500 : 1500;
 
@@ -309,7 +289,7 @@ export default function QuizScreen({ level, onQuizComplete, onGoToTop, showTimer
           clearInterval(timerIntervalRef.current);
         }
         const finalTime = Date.now() - startTimeRef.current;
-        onQuizComplete(isCorrect ? score + 10 : score, finalTime);
+        onQuizComplete(score + (isCorrect ? 10 : 0), finalTime);
       } else {
         // Next question
         setCurrentQuestionIndex((prev) => prev + 1);
@@ -357,93 +337,46 @@ export default function QuizScreen({ level, onQuizComplete, onGoToTop, showTimer
       </div>
 
       <div className="flex flex-col">
-        <div className="flex justify-center items-start gap-8">
-          {!question.showCalculationPad && (
-            <div className="flex-1">
-              <div className="mb-6 relative">
-                {question.geometry && <GeometryDisplay geometry={question.geometry} />}
-                <div
-                  className={`text-6xl ${
-                    question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'
-                  } font-black tracking-wider min-h-[80px] flex items-center justify-center`}
-                >
-                  {question.text}
-                </div>
-
-            <div className="flex flex-col">
-                <div className="relative"> {/* New container for relative positioning */}
-                    <div className="flex justify-center items-start gap-8">
-                        {!question.showCalculationPad &&
-                            <div className="flex-1">
-                                <div className="mb-6">
-                                    {question.geometry && <GeometryDisplay geometry={question.geometry} />}
-                                    <div className={`text-6xl ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'} font-black tracking-wider min-h-[80px] flex items-center justify-center`}>
-                                        {question.text}
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        {question.showCalculationPad && multiplicationNumbers && (
-                            <div className="flex-1">
-                                <CalculationPad
-                                    key={currentQuestionIndex}
-                                    num1={multiplicationNumbers.num1}
-                                    num2={multiplicationNumbers.num2}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Feedback Overlay */}
-                    <div
-                        className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${feedback.show ? 'opacity-100' : 'opacity-0'
-                            }`}
-                    >
-                        <span
-                            className={`text-8xl filter drop-shadow-lg transform transition-transform duration-300 ${feedback.show ? 'scale-100' : 'scale-0'
-                                } ${feedback.isCorrect ? 'text-brand-green' : 'text-brand-red'}`}
-                        >
-                            {feedback.isCorrect ? '⭕' : '❌'}
-                        </span>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                    {question.options.map((option) => {
-                        const isSelected = selectedAnswer === option;
-                        const isCorrect = option === question.correctAnswer;
-                        const showCorrect = selectedAnswer !== null && !feedback.isCorrect && isCorrect;
-
-                        let buttonClass = 'bg-slate-100 answer-btn-hover text-slate-700 border-slate-200';
-
-                        if (isSelected && feedback.isCorrect) {
-                            buttonClass = 'bg-brand-green text-white border-brand-green shadow-[0_4px_0_rgb(86,168,98)]';
-                        } else if (isSelected && !feedback.isCorrect) {
-                            buttonClass = 'bg-brand-red text-white border-brand-red shadow-[0_4px_0_rgb(255,73,73)]';
-                        } else if (showCorrect) {
-                            buttonClass = 'bg-green-50 text-slate-700 border-slate-200 ring-4 ring-brand-green';
-                        }
-
-                        return (
-                            <button
-                                key={option}
-                                onClick={() => handleAnswer(option)}
-                                disabled={isAnswering}
-                                className={`${buttonClass} font-bold text-3xl py-2 rounded-2xl shadow-sm border-2 transition-all active:scale-95`}
-                            >
-                                {option}
-                            </button>
-                        );
-                    })}
+        <div className="relative">
+          <div className="flex justify-center items-start gap-8">
+            {!question.showCalculationPad && (
+              <div className="flex-1">
+                <div className="mb-6">
+                  {question.geometry && <GeometryDisplay geometry={question.geometry} />}
+                  <div
+                    className={`text-6xl ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'
+                      } font-black tracking-wider min-h-[80px] flex items-center justify-center`}
+                  >
+                    {question.text}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          {question.showCalculationPad && multiplicationNumbers && (
-            <div className="flex-1">
-              <CalculationPad key={currentQuestionIndex} num1={multiplicationNumbers.num1} num2={multiplicationNumbers.num2} />
-            </div>
-          )}
+            )}
+            {question.showCalculationPad && multiplicationNumbers && (
+              <div className="flex-1">
+                <CalculationPad
+                  key={currentQuestionIndex}
+                  num1={multiplicationNumbers.num1}
+                  num2={multiplicationNumbers.num2}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Feedback Overlay */}
+          <div
+            className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${feedback.show ? 'opacity-100' : 'opacity-0'
+              }`}
+          >
+            <span
+              className={`text-8xl filter drop-shadow-lg transform transition-transform duration-300 ${feedback.show ? 'scale-100' : 'scale-0'
+                } ${feedback.isCorrect ? 'text-brand-green' : 'text-brand-red'}`}
+            >
+              {feedback.isCorrect ? '⭕' : '❌'}
+            </span>
+          </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4 mt-4">
           {question.options.map((option) => {
             const isSelected = selectedAnswer === option;
