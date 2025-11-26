@@ -143,6 +143,9 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
     const startTimeRef = useRef<number>(Date.now());
     const timerIntervalRef = useRef<number | null>(null);
 
+    // Add state for correction mode
+    const [isCorrectionMode, setIsCorrectionMode] = useState(false);
+
     const totalQuestions = 10;
 
     // Countdown effect
@@ -181,29 +184,38 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
 
         if (isCorrect) {
             setScore(prev => prev + 10);
-        }
-
-        const nextQuestionDelay = isCorrect ? 500 : 1500;
-
-        setTimeout(() => {
-            setFeedback({ show: false, isCorrect: false });
-            setSelectedAnswer(null);
-            setIsAnswering(false);
-
-            if (currentQuestionIndex >= totalQuestions) {
-                // Quiz complete
+            const nextQuestionDelay = 500;
+            setTimeout(handleNextQuestion, nextQuestionDelay);
+        } else {
+            // Incorrect answer
+            if (answerMode === 'calculationPad') {
+                setIsCorrectionMode(true);
                 if (timerIntervalRef.current) {
                     clearInterval(timerIntervalRef.current);
                 }
-                const finalTime = Date.now() - startTimeRef.current;
-                const finalScore = isCorrect ? score + 10 : score;
-                onQuizComplete(finalScore, finalTime);
             } else {
-                // Next question
-                setCurrentQuestionIndex(prev => prev + 1);
-                setQuestion(QuestionFactory.create(level).generate(answerMode));
+                const nextQuestionDelay = 1500;
+                setTimeout(handleNextQuestion, nextQuestionDelay);
             }
-        }, nextQuestionDelay);
+        }
+    };
+
+    const handleNextQuestion = () => {
+        setFeedback({ show: false, isCorrect: false });
+        setSelectedAnswer(null);
+        setIsAnswering(false);
+        setIsCorrectionMode(false);
+
+        if (currentQuestionIndex >= totalQuestions) {
+            if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+            }
+            const finalTime = Date.now() - startTimeRef.current;
+            onQuizComplete(score, finalTime);
+        } else {
+            setCurrentQuestionIndex(prev => prev + 1);
+            setQuestion(QuestionFactory.create(level).generate(answerMode));
+        }
     };
 
     const progress = ((currentQuestionIndex - 1) / totalQuestions) * 100;
@@ -285,7 +297,15 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
 
             {answerMode === 'calculationPad' && question.num1 && question.num2 && (
                 <div className="mt-4">
-                    <CalculationPad key={currentQuestionIndex} num1={question.num1} num2={question.num2} onSubmit={handleAnswer} />
+                    <CalculationPad
+                        key={currentQuestionIndex}
+                        num1={question.num1}
+                        num2={question.num2}
+                        onSubmit={handleAnswer}
+                        onNextQuestion={handleNextQuestion}
+                        isCorrectionMode={isCorrectionMode}
+                        correctAnswer={question.correctAnswer}
+                    />
                 </div>
             )}
 
