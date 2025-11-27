@@ -11,7 +11,7 @@ interface WelcomeScreenProps {
    * ゲーム開始ボタンがクリックされたときに呼び出されるコールバック関数
    * @param level 選択されたゲームレベルID
    */
-  onStartGame: (level: GameLevel) => void;
+  onStartGame: (level: (typeof GRADES)[number]["levels"][number]) => void;
   /**
    * 履歴表示ボタンがクリックされたときに呼び出されるコールバック関数
    */
