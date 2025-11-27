@@ -5,7 +5,7 @@ import { GRADES } from '../constants';
 import { QuestionFactory } from '../questions/QuestionFactory';
 import CalculationPad from './CalculationPad';
 import FeedbackOverlay from './FeedbackOverlay';
-import { GRADES } from '../constants';
+import DrawingCanvas, { DrawingCanvasHandle } from './DrawingCanvas';
 import { calculateScore } from '../utils/score';
 
 /**
@@ -148,6 +148,7 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
     const timerIntervalRef = useRef<number | null>(null);
     const pauseTimeRef = useRef<number | null>(null);
     const quizEndedRef = useRef(false);
+    const drawingCanvasRef = useRef<DrawingCanvasHandle>(null);
 
     // Add state for correction mode
     const [isCorrectionMode, setIsCorrectionMode] = useState(false);
@@ -229,6 +230,11 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
     };
 
     const handleNextQuestion = () => {
+        // Clear the drawing canvas
+        if (drawingCanvasRef.current) {
+            drawingCanvasRef.current.clear();
+        }
+
         // Restart timer if coming from correction mode
         if (pauseTimeRef.current) {
             const pausedDuration = Date.now() - pauseTimeRef.current;
@@ -262,85 +268,93 @@ export default function QuizScreen({ level, answerMode, onQuizComplete, onGoToTo
     }
 
     return (
-        <div className={`bg-white rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-8 pb-20 text-center border-4 border-white ring-4 ring-purple-100 relative overflow-hidden ${isAnswering ? 'pointer-events-none' : ''}`}>
-            <FeedbackOverlay show={feedback.show} isCorrect={feedback.isCorrect} />
-            {/* Progress Bar */}
-            <div className="absolute top-0 left-0 w-full h-3 bg-slate-100">
-                <div className="h-full bg-brand-green transition-all duration-500" style={{ width: `${progress}%` }} />
-            </div>
+        <div className="flex flex-col lg:flex-row gap-6 h-full items-stretch">
+            {/* Quiz Section - Left */}
+            <div className={`bg-white rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] p-8 pb-20 text-center border-4 border-white ring-4 ring-purple-100 relative overflow-hidden w-full lg:max-w-md lg:w-[450px] shrink-0 mx-auto ${isAnswering ? 'pointer-events-none' : ''}`}>
+                <FeedbackOverlay show={feedback.show} isCorrect={feedback.isCorrect} />
+                {/* Progress Bar */}
+                <div className="absolute top-0 left-0 w-full h-3 bg-slate-100">
+                    <div className="h-full bg-brand-green transition-all duration-500" style={{ width: `${progress}%` }} />
+                </div>
 
-            {/* Timer Display */}
-            {showTimer && (
-                <div className="mt-4 mb-2 flex justify-center">
-                    <div className="bg-slate-800 text-brand-yellow px-6 py-2 rounded-xl font-mono text-3xl font-bold tracking-wider shadow-sm border-2 border-slate-700">
-                        {formatTime(elapsedTime)}
+                {/* Timer Display */}
+                {showTimer && (
+                    <div className="mt-4 mb-2 flex justify-center">
+                        <div className="bg-slate-800 text-brand-yellow px-6 py-2 rounded-xl font-mono text-3xl font-bold tracking-wider shadow-sm border-2 border-slate-700">
+                            {formatTime(elapsedTime)}
+                        </div>
+                    </div>
+                )}
+                {!showTimer && <div className="mt-8"></div>}
+
+                <div className="flex justify-between items-center mb-8 mt-2">
+                    <div className="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-600">
+                        もんだい <span className="text-brand-blue text-xl">{currentQuestionIndex}</span>/{totalQuestions}
+                    </div>
+                    <div className="bg-yellow-50 px-4 py-2 rounded-full font-bold text-yellow-600 border-2 border-yellow-100">
+                        スコア: <span>{calculateScore(correctAnswerCount, totalQuestions)}</span>
                     </div>
                 </div>
-            )}
-            {!showTimer && <div className="mt-8"></div>}
 
-            <div className="flex justify-between items-center mb-8 mt-2">
-                <div className="bg-slate-100 px-4 py-2 rounded-full font-bold text-slate-600">
-                    もんだい <span className="text-brand-blue text-xl">{currentQuestionIndex}</span>/{totalQuestions}
-                </div>
-                <div className="bg-yellow-50 px-4 py-2 rounded-full font-bold text-yellow-600 border-2 border-yellow-100">
-                    スコア: <span>{calculateScore(correctAnswerCount, totalQuestions)}</span>
-                </div>
-            </div>
-
-            <div className="relative">
-                <div className={`mb-6 transition-opacity duration-300 ${isAnswering ? 'opacity-20' : 'opacity-100'}`}>
-                    {question.geometry && <GeometryDisplay geometry={question.geometry} />}
-                    <div className={`text-6xl ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'} font-black tracking-wider min-h-[80px] flex items-center justify-center`}>
-                        {question.text}
+                <div className="relative">
+                    <div className={`mb-6 transition-opacity duration-300 ${isAnswering ? 'opacity-20' : 'opacity-100'}`}>
+                        {question.geometry && <GeometryDisplay geometry={question.geometry} />}
+                        <div className={`text-6xl ${question.geometry ? 'text-xs text-slate-300' : 'text-slate-800'} font-black tracking-wider min-h-[80px] flex items-center justify-center`}>
+                            {question.text}
+                        </div>
                     </div>
                 </div>
+
+                {answerMode === 'choice' && (
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                        {question.options.map((option) => {
+                            const isSelected = selectedAnswer === option;
+                            const isCorrect = option === question.correctAnswer;
+                            const showCorrect = selectedAnswer !== null && !feedback.isCorrect && isCorrect;
+
+                            let buttonClass = 'bg-slate-100 answer-btn-hover text-slate-700 border-slate-200';
+                            if (isSelected && feedback.isCorrect) {
+                                buttonClass = 'bg-brand-green text-white border-brand-green shadow-[0_4px_0_rgb(86,168,98)]';
+                            } else if (isSelected && !feedback.isCorrect) {
+                                buttonClass = 'bg-brand-red text-white border-brand-red shadow-[0_4px_0_rgb(255,73,73)]';
+                            } else if (showCorrect) {
+                                buttonClass = 'bg-green-50 text-slate-700 border-slate-200 ring-4 ring-brand-green';
+                            }
+
+                            return (
+                                <button key={option} onClick={() => handleAnswer(option)} disabled={isAnswering} className={`${buttonClass} font-bold text-3xl py-2 rounded-2xl shadow-sm border-2 transition-all active:scale-95`}>
+                                    {option}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {answerMode === 'calculationPad' && question.num1 && question.num2 && (
+                    <div className="mt-4">
+                        <CalculationPad
+                            key={currentQuestionIndex}
+                            num1={question.num1}
+                            num2={question.num2}
+                            onSubmit={handleAnswer}
+                            onNextQuestion={handleNextQuestion}
+                            isCorrectionMode={isCorrectionMode}
+                            correctAnswer={question.correctAnswer}
+                        />
+                    </div>
+                )}
+
+                <button onClick={onGoToTop} className="absolute bottom-3 right-3 bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-full p-2 transition-all" aria-label="トップにもどる">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-8 h-8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                    </svg>
+                </button>
             </div>
 
-            {answerMode === 'choice' && (
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                    {question.options.map((option) => {
-                        const isSelected = selectedAnswer === option;
-                        const isCorrect = option === question.correctAnswer;
-                        const showCorrect = selectedAnswer !== null && !feedback.isCorrect && isCorrect;
-
-                        let buttonClass = 'bg-slate-100 answer-btn-hover text-slate-700 border-slate-200';
-                        if (isSelected && feedback.isCorrect) {
-                            buttonClass = 'bg-brand-green text-white border-brand-green shadow-[0_4px_0_rgb(86,168,98)]';
-                        } else if (isSelected && !feedback.isCorrect) {
-                            buttonClass = 'bg-brand-red text-white border-brand-red shadow-[0_4px_0_rgb(255,73,73)]';
-                        } else if (showCorrect) {
-                            buttonClass = 'bg-green-50 text-slate-700 border-slate-200 ring-4 ring-brand-green';
-                        }
-
-                        return (
-                            <button key={option} onClick={() => handleAnswer(option)} disabled={isAnswering} className={`${buttonClass} font-bold text-3xl py-2 rounded-2xl shadow-sm border-2 transition-all active:scale-95`}>
-                                {option}
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
-
-            {answerMode === 'calculationPad' && question.num1 && question.num2 && (
-                <div className="mt-4">
-                    <CalculationPad
-                        key={currentQuestionIndex}
-                        num1={question.num1}
-                        num2={question.num2}
-                        onSubmit={handleAnswer}
-                        onNextQuestion={handleNextQuestion}
-                        isCorrectionMode={isCorrectionMode}
-                        correctAnswer={question.correctAnswer}
-                    />
-                </div>
-            )}
-
-            <button onClick={onGoToTop} className="absolute bottom-3 right-3 bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-full p-2 transition-all" aria-label="トップにもどる">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-8 h-8">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                </svg>
-            </button>
+            {/* Drawing Canvas Section - Right (Visible only on large screens) */}
+            <div className="hidden lg:block flex-1 bg-white/50 backdrop-blur-sm rounded-3xl shadow-sm p-2 border-2 border-dashed border-slate-200">
+                <DrawingCanvas ref={drawingCanvasRef} />
+            </div>
         </div>
     );
 }
