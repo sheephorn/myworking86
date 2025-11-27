@@ -10,6 +10,7 @@ export const GRADES = [
       {
         id: "grade-1-calc",
         name: "たしざん・ひきざん",
+        numberOfQuestions: 10,
       },
     ],
   },
@@ -20,6 +21,7 @@ export const GRADES = [
       {
         id: "grade-2-kuku",
         name: "九九",
+        numberOfQuestions: 10,
       },
     ],
   },
@@ -30,11 +32,13 @@ export const GRADES = [
       {
         id: "grade-4-geometry",
         name: "図形の面積",
+        numberOfQuestions: 10,
       },
       {
         id: "grade-4-multiplication",
         name: "2桁のかけ算",
         calculationPadAvailable: true,
+        numberOfQuestions: 10,
       },
     ],
   },

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { GameLevel } from "../types";
 import { GRADES } from "../constants";
 
 /**
@@ -10,7 +9,7 @@ interface WelcomeScreenProps {
    * ゲーム開始ボタンがクリックされたときに呼び出されるコールバック関数
    * @param level 選択されたゲームレベルID
    */
-  onStartGame: (level: GameLevel) => void;
+  onStartGame: (level: (typeof GRADES)[number]["levels"][number]) => void;
   /**
    * 履歴表示ボタンがクリックされたときに呼び出されるコールバック関数
    */
@@ -68,7 +67,7 @@ export default function WelcomeScreen({
       {GRADES.find((g) => g.grade === selectedGrade)?.levels.map((level) => (
         <button
           key={level.id}
-          onClick={() => onStartGame(level.id)}
+          onClick={() => onStartGame(level)}
           className="w-full bg-brand-blue hover:bg-blue-300 text-slate-800 font-black text-2xl py-4 rounded-2xl shadow-[0_6px_0_rgb(74,168,209)] active:shadow-[0_0px_0_rgb(74,168,209)] active:translate-y-[6px] transition-all"
         >
           {level.name}
