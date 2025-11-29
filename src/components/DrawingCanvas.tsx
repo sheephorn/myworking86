@@ -166,6 +166,14 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
     };
   };
 
+  const getCoordinates = (e: React.PointerEvent | PointerEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top
+    };
+  };
+
   const handleChangePenSize = (size: number) => {
     setPenSize(size);
     const currentSettings = getSettings();
