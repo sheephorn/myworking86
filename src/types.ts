@@ -5,6 +5,7 @@
  */
 export type GameLevel =
   | "grade-1-calc"
+  | "grade-1-word-problems"
   | "grade-2-kuku"
   | "grade-4-geometry"
   | "grade-4-multiplication";
@@ -17,16 +18,7 @@ export interface MedalCriteria {
   silverThreshold: number; // in milliseconds
 }
 
-/**
- * 1つの学習ユニット（レベル）を表すインターフェース。
- */
-export interface Level {
-  id: GameLevel;
-  name: string;
-  calculationPadAvailable?: boolean;
-  numberOfQuestions?: number;
-  medalCriteria?: MedalCriteria;
-}
+
 
 /**
  * 1つの学年を表すインターフェース。
