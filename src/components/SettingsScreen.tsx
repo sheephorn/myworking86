@@ -71,6 +71,7 @@ export default function SettingsScreen({ onBack, onSettingsChange }: SettingsScr
 
       <div className="mt-8 text-center text-sm text-slate-400">
         <p>設定は自動で保存されます</p>
+        <p className="mt-2 text-xs opacity-50">version: {__BUILD_VERSION__}</p>
       </div>
     </div>
   );
