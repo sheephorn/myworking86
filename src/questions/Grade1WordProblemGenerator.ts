@@ -1,4 +1,4 @@
-import { Question, AnswerMode } from '../types';
+import { Question } from '../types';
 import { QuestionGenerator } from './QuestionGenerator';
 
 type ProblemTemplate = {
@@ -231,7 +231,7 @@ export class Grade1WordProblemGenerator implements QuestionGenerator {
     }
   ];
 
-  generate(_answerMode: AnswerMode): Question {
+  generate(): Question {
     const template = this.pick(this.templates);
     const problem = template.generate();
 
@@ -284,8 +284,8 @@ export class Grade1WordProblemGenerator implements QuestionGenerator {
 
     // もし4つ埋まらなかったら適当に埋める
     while (options.size < 4) {
-        const wrong = answer + this.getRandomInt(1, 10);
-        if (wrong !== answer) options.add(wrong);
+      const wrong = answer + this.getRandomInt(1, 10);
+      if (wrong !== answer) options.add(wrong);
     }
 
     return Array.from(options).sort(() => Math.random() - 0.5);
