@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { AnswerMode } from '../types';
-import { GRADES } from '../constants';
+import { GRADES, DEFAULT_MEDAL_CRITERIA } from '../constants';
 import CalculationPad from './CalculationPad';
-import DrawingCanvas, { DrawingCanvasHandle } from './DrawingCanvas';
+import DrawingCanvas, { DrawingCanvasHandle } from './quiz/DrawingCanvas';
 import { useQuiz } from '../hooks/useQuiz';
 import QuizHeader from './quiz/QuizHeader';
 import QuestionDisplay from './quiz/QuestionDisplay';

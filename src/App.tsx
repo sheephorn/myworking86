@@ -50,7 +50,7 @@ function App() {
   useEffect(() => {
     // Track user properties if profile is loaded on mount
     if (userProfile) {
-      setUserProperties(userProfile.nickname, userProfile.grade);
+      setUserProperties(userProfile.nickname, String(userProfile.grade));
     }
   }, [userProfile]);
 
@@ -134,7 +134,7 @@ function App() {
   const handleRegistrationComplete = (profile: UserProfile) => {
     saveUserProfile(profile);
     setUserProfile(profile);
-    setUserProperties(profile.nickname, profile.grade);
+    setUserProperties(profile.nickname, String(profile.grade));
     setScreen("welcome");
   };
 
@@ -151,7 +151,7 @@ function App() {
     const profile = getUserProfile();
     if (profile) {
       setUserProfile(profile);
-      setUserProperties(profile.nickname, profile.grade);
+      setUserProperties(profile.nickname, String(profile.grade));
       setHistory(getHistory()); // Load history for new user
       setScreen("welcome"); // Reset to welcome screen
     }

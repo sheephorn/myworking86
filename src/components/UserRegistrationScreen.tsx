@@ -82,11 +82,10 @@ export default function UserRegistrationScreen({ onComplete }: UserRegistrationS
           <button
             type="submit"
             disabled={!isFormValid}
-            className={`w-full font-black text-2xl py-4 rounded-2xl shadow-[0_6px_0_rgb(74,168,209)] transition-all mt-8 ${
-              isFormValid
-                ? "bg-brand-blue hover:bg-blue-300 text-slate-800 active:shadow-[0_0px_0_rgb(74,168,209)] active:translate-y-[6px]"
-                : "bg-slate-200 text-slate-400 shadow-none cursor-not-allowed"
-            }`}
+            className={`w-full font-black text-2xl py-4 rounded-2xl shadow-[0_6px_0_rgb(74,168,209)] transition-all mt-8 ${isFormValid
+              ? "bg-brand-blue hover:bg-blue-300 text-slate-800 active:shadow-[0_0px_0_rgb(74,168,209)] active:translate-y-[6px]"
+              : "bg-slate-200 text-slate-400 shadow-none cursor-not-allowed"
+              }`}
           >
             はじめる！
           </button>
