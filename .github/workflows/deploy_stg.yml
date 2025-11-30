@@ -58,4 +58,4 @@ jobs:
           port: 22
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "public"
-          target: "/var/www/2-app"
+          target: ${{ secrets.APP_ROUTE_PATH_STG }}

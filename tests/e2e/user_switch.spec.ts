@@ -15,7 +15,7 @@ test('user registration and switch user flow', async ({ page }) => {
   }
 
   // Wait for Welcome Screen to appear (look for "さんすう" text)
-  await expect(page.locator('text=さんすう')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /さんすう/ })).toBeVisible();
 
   // Verify first user's name is displayed
   await expect(page.locator('text=テスト花子さん')).toBeVisible();
@@ -39,7 +39,7 @@ test('user registration and switch user flow', async ({ page }) => {
 
   // 4. Verify User Switch
   // Should automatically be on Welcome Screen as the new user
-  await expect(page.locator('text=さんすう')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /さんすう/ })).toBeVisible();
   await expect(page.locator('text=テスト太郎さん')).toBeVisible();
 
   // 5. Switch back to first user
