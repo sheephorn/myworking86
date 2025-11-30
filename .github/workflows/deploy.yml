@@ -24,4 +24,6 @@ jobs:
             git fetch origin
             git reset --hard origin/main
             npm install
+            export VITE_GA_MEASUREMENT_ID='${{ secrets.VITE_GA_MEASUREMENT_ID }}'
+            export VITE_GA_ALLOWED_DOMAINS='${{ secrets.VITE_GA_ALLOWED_DOMAINS }}'
             npm run build

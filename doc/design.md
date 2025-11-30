@@ -221,3 +221,23 @@ export interface HistoryRecord {
 4.  **4年生 2桁の掛け算 (Grade 4 Multiplication)**
     * `(10-99) x (10-99)`
     * このレベルの問題では、筆算パッドが表示されます。
+
+---
+
+## Google Analytics 設定
+
+Google Analytics (GA) の動作を環境ごとに制御するため、設定を環境変数と動的な初期化ロジックに移行しました。
+
+### 機能概要
+
+*   **環境変数制御**: GAの測定ID (`VITE_GA_MEASUREMENT_ID`) と、GAの動作を許可するドメインリスト (`VITE_GA_ALLOWED_DOMAINS`) を環境変数で管理します。
+*   **ドメイン制限**: アプリケーション起動時に現在のドメイン (`window.location.hostname`) をチェックし、環境変数で指定された正規表現パターンにマッチする場合のみ、GAのスクリプトを読み込みます。
+*   **ログ出力**: 開発時のデバッグを容易にするため、GAへのイベント送信ログ（`console.log`）は、ドメインの一致/不一致に関わらず常に出力されます。実際のGAへのデータ送信（`window.gtag`の実行）は、GAが正しく初期化されている場合のみ行われます。
+
+### 実装詳細
+
+*   **`src/utils/analytics.ts`**:
+    *   `initializeAnalytics()`: 環境変数を読み込み、ドメイン判定を行い、GAスクリプトを動的にインジェクトします。
+    *   `VITE_GA_ALLOWED_DOMAINS` はカンマ区切りの文字列（例: `^localhost$,^example\.com$`）として定義します。
+*   **`src/main.tsx`**:
+    *   アプリケーションのマウント前に `initializeAnalytics()` を呼び出します。
