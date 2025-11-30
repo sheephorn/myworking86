@@ -1,155 +1,33 @@
-import { HistoryRecord, GameSettings, UserProfile, User } from "../types";
-import { SETTINGS_STORAGE_KEY, USER_PROFILE_STORAGE_KEY } from "../constants";
+import { HistoryRecord, GameSettings, UserProfile } from "../types";
+import {
+  SETTINGS_STORAGE_KEY,
+  USER_PROFILE_STORAGE_KEY,
+  USER_LIST_STORAGE_KEY,
+  CURRENT_USER_ID_STORAGE_KEY,
+} from "../constants";
 
-const USERS_STORAGE_KEY = "quiz_users";
-const CURRENT_USER_ID_KEY = "quiz_current_user_id";
-const OLD_HISTORY_KEY = "quiz_history";
-const HISTORY_PREFIX = "quiz_history_";
+// The history storage key depends on the current user.
+// We need a helper to get the key for the current user.
+const getHistoryKey = () => {
+  const currentUser = getCurrentUserId();
+  if (currentUser) {
+    return `quiz_history_${currentUser}`;
+  }
+  // Fallback for legacy or unknown user (should eventually be migrated)
+  return "quiz_history";
+};
+
 const MAX_HISTORY_ITEMS = 10;
 
 /**
- * IDを生成します
- */
-function generateId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
-
-/**
- * 保存されているすべてのユーザーを取得します。
- * 初回実行時に既存のユーザープロフィールが存在する場合は、マイグレーションを行います。
- */
-export function getUsers(): User[] {
-  try {
-    const json = localStorage.getItem(USERS_STORAGE_KEY);
-    if (json) {
-      return JSON.parse(json) as User[];
-    }
-
-    // Migration logic
-    const oldProfileJson = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
-    if (oldProfileJson) {
-      const oldProfile = JSON.parse(oldProfileJson) as UserProfile;
-      const newId = generateId();
-      const newUser: User = { ...oldProfile, id: newId };
-
-      // Save new user list
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([newUser]));
-      // Set as current user
-      localStorage.setItem(CURRENT_USER_ID_KEY, newId);
-
-      // Migrate history
-      const oldHistoryJson = localStorage.getItem(OLD_HISTORY_KEY);
-      if (oldHistoryJson) {
-        localStorage.setItem(`${HISTORY_PREFIX}${newId}`, oldHistoryJson);
-        // Optional: Remove old history key? Keeping it for safety for now.
-      }
-
-      return [newUser];
-    }
-
-    return [];
-  } catch (e) {
-    console.error("Failed to parse users", e);
-    return [];
-  }
-}
-
-/**
- * 現在選択されているユーザーを取得します。
- */
-export function getCurrentUser(): User | null {
-  try {
-    const userId = localStorage.getItem(CURRENT_USER_ID_KEY);
-    const users = getUsers();
-    if (userId) {
-      return users.find(u => u.id === userId) || null;
-    }
-    // If no current user set but users exist, select the first one
-    if (users.length > 0) {
-      localStorage.setItem(CURRENT_USER_ID_KEY, users[0].id);
-      return users[0];
-    }
-    return null;
-  } catch (e) {
-    console.error("Failed to get current user", e);
-    return null;
-  }
-}
-
-/**
- * ユーザーを追加し、そのユーザーに切り替えます。
- */
-export function saveUser(profile: UserProfile): User {
-  const users = getUsers();
-  const newUser: User = { ...profile, id: generateId() };
-  users.push(newUser);
-
-  try {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    localStorage.setItem(CURRENT_USER_ID_KEY, newUser.id);
-  } catch (e) {
-    console.error("Failed to save user", e);
-  }
-  return newUser;
-}
-
-/**
- * 指定したユーザーに切り替えます。
- */
-export function switchUser(userId: string): void {
-  try {
-    localStorage.setItem(CURRENT_USER_ID_KEY, userId);
-  } catch (e) {
-    console.error("Failed to switch user", e);
-  }
-}
-
-/**
- * 指定したユーザーを削除します。
- * 現在のユーザーを削除した場合は、他のユーザーに切り替えるか、ユーザーなし状態になります。
- */
-export function deleteUser(userId: string): User | null {
-  let users = getUsers();
-  users = users.filter(u => u.id !== userId);
-
-  try {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-
-    // Remove history for this user
-    localStorage.removeItem(`${HISTORY_PREFIX}${userId}`);
-
-    const currentUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
-    if (currentUserId === userId) {
-      if (users.length > 0) {
-        const nextUser = users[0];
-        localStorage.setItem(CURRENT_USER_ID_KEY, nextUser.id);
-        return nextUser;
-      } else {
-        localStorage.removeItem(CURRENT_USER_ID_KEY);
-        return null;
-      }
-    }
-    // If we didn't delete the current user, return the current user (re-fetch to be safe)
-    return getCurrentUser();
-  } catch (e) {
-    console.error("Failed to delete user", e);
-    return null;
-  }
-}
-
-/**
- * localStorageから現在のユーザーのクイズ履歴を取得します。
+ * localStorageからクイズの履歴を取得します。
+ * パースに失敗した場合は空の配列を返します。
  * @returns クイズ履歴レコードの配列
  */
 export function getHistory(): HistoryRecord[] {
-  const currentUser = getCurrentUser();
-  if (!currentUser) return [];
-
   try {
-    const json = localStorage.getItem(`${HISTORY_PREFIX}${currentUser.id}`);
+    const key = getHistoryKey();
+    const json = localStorage.getItem(key);
     if (!json) {
       return [];
     }
@@ -161,13 +39,11 @@ export function getHistory(): HistoryRecord[] {
 }
 
 /**
- * 新しいクイズの記録を現在のユーザーの履歴に保存します。
+ * 新しいクイズの記録を履歴に保存します。
+ * 履歴は新しいものが先頭になるようにソートされ、最大10件まで保持されます。
  * @param record 保存する新しい履歴レコード
  */
 export function saveRecord(record: HistoryRecord): void {
-  const currentUser = getCurrentUser();
-  if (!currentUser) return;
-
   const history = getHistory();
   // Add new record
   history.push(record);
@@ -179,21 +55,20 @@ export function saveRecord(record: HistoryRecord): void {
   const newHistory = history.slice(0, MAX_HISTORY_ITEMS);
 
   try {
-    localStorage.setItem(`${HISTORY_PREFIX}${currentUser.id}`, JSON.stringify(newHistory));
+    const key = getHistoryKey();
+    localStorage.setItem(key, JSON.stringify(newHistory));
   } catch (e) {
     console.error("Failed to save history", e);
   }
 }
 
 /**
- * localStorageから現在のユーザーのクイズ履歴を削除します。
+ * localStorageからすべてのクイズ履歴を削除します。
  */
 export function clearHistory(): void {
-  const currentUser = getCurrentUser();
-  if (!currentUser) return;
-
   try {
-    localStorage.removeItem(`${HISTORY_PREFIX}${currentUser.id}`);
+    const key = getHistoryKey();
+    localStorage.removeItem(key);
   } catch (e) {
     console.error("Failed to clear history", e);
   }
@@ -232,17 +107,101 @@ export function saveSettings(settings: GameSettings): void {
 }
 
 /**
- * 古いgetUserProfile関数のラッパー。
- * 互換性のために残していますが、getCurrentUserの使用を推奨します。
+ * すべてのユーザーリストを取得します。
  */
-export function getUserProfile(): User | null {
-  return getCurrentUser();
+export function getUsers(): UserProfile[] {
+  try {
+    const json = localStorage.getItem(USER_LIST_STORAGE_KEY);
+    if (!json) {
+      // Migrate legacy single user if exists
+      const legacyJson = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
+      if (legacyJson) {
+        const legacyUser = JSON.parse(legacyJson);
+        // If legacy user doesn't have an ID, give it one.
+        // Although the type definition now requires ID, the legacy data won't have it.
+        if (!legacyUser.id) {
+          legacyUser.id = crypto.randomUUID();
+        }
+        const users = [legacyUser as UserProfile];
+        saveUsers(users);
+        setCurrentUser(legacyUser.id);
+        // Also need to migrate history?
+        // For simplicity, we might leave old history behind or move it.
+        // Let's copy old history to new user key.
+        const oldHistory = localStorage.getItem("quiz_history");
+        if (oldHistory) {
+            localStorage.setItem(`quiz_history_${legacyUser.id}`, oldHistory);
+        }
+
+        return users;
+      }
+      return [];
+    }
+    return JSON.parse(json) as UserProfile[];
+  } catch (e) {
+    console.error("Failed to parse users", e);
+    return [];
+  }
 }
 
 /**
- * 古いsaveUserProfile関数のラッパー。
- * 実際には新しいユーザーを作成します。
+ * ユーザーリストを保存します。
+ */
+function saveUsers(users: UserProfile[]): void {
+  try {
+    localStorage.setItem(USER_LIST_STORAGE_KEY, JSON.stringify(users));
+  } catch (e) {
+    console.error("Failed to save users", e);
+  }
+}
+
+/**
+ * 現在のユーザーIDを取得します。
+ */
+export function getCurrentUserId(): string | null {
+  return localStorage.getItem(CURRENT_USER_ID_STORAGE_KEY);
+}
+
+/**
+ * 現在のユーザーIDを設定します。
+ */
+export function setCurrentUser(userId: string): void {
+  localStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, userId);
+}
+
+/**
+ * 新しいユーザーを追加または更新します。
  */
 export function saveUserProfile(profile: UserProfile): void {
-  saveUser(profile);
+  const users = getUsers();
+  const index = users.findIndex(u => u.id === profile.id);
+
+  if (index >= 0) {
+    users[index] = profile;
+  } else {
+    users.push(profile);
+  }
+
+  saveUsers(users);
+  setCurrentUser(profile.id);
+}
+
+/**
+ * 現在アクティブなユーザープロフィールを取得します。
+ */
+export function getUserProfile(): UserProfile | null {
+    const users = getUsers();
+    const currentId = getCurrentUserId();
+
+    if (!currentId) {
+        if (users.length > 0) {
+            // If we have users but no current ID, default to the first one
+            setCurrentUser(users[0].id);
+            return users[0];
+        }
+        return null;
+    }
+
+    const user = users.find(u => u.id === currentId);
+    return user || null;
 }

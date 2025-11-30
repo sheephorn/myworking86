@@ -12,19 +12,18 @@ import {
   HistoryRecord,
   GameSettings,
   AnswerMode,
+  GameLevel,
   UserProfile,
-  User,
 } from "./types";
 import {
   getHistory,
   saveRecord,
   clearHistory,
   getSettings,
-  getCurrentUser,
-  saveUser,
+  getUserProfile,
+  saveUserProfile,
   getUsers,
-  switchUser,
-  deleteUser,
+  setCurrentUser,
 } from "./utils/storage";
 import { setUserProperties, trackQuizComplete } from "./utils/analytics";
 import { GRADES } from "./constants";
@@ -42,29 +41,23 @@ function App() {
   const [finalTime, setFinalTime] = useState(0);
   const [history, setHistory] = useState<HistoryRecord[]>([]);
   const [settings, setSettings] = useState<GameSettings>({ showTimer: true });
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isAnswerModeModalOpen, setIsAnswerModeModalOpen] = useState(false);
   const [isUserSwitchModalOpen, setIsUserSwitchModalOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
 
-  // Initialize data
   useEffect(() => {
-    // Check/Migrate users first
-    const loadedUsers = getUsers();
-    setUsers(loadedUsers);
+    // Load history and settings
+    setHistory(getHistory());
+    setSettings(getSettings());
 
-    const user = getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      setUserProperties(user.nickname, user.grade);
-      setScreen("welcome");
-      // Load history for the current user
-      setHistory(getHistory());
+    // Check for user profile
+    const profile = getUserProfile();
+    if (profile) {
+      setUserProfile(profile);
+      setUserProperties(profile.nickname, profile.grade);
     } else {
       setScreen("registration");
     }
-
-    setSettings(getSettings());
   }, []);
 
   const handleStartGame = (selectedLevel: (typeof GRADES)[number]['levels'][number]) => {
@@ -120,6 +113,7 @@ function App() {
   };
 
   const handleGoToTop = () => {
+    setHistory(getHistory()); // Refresh history when returning to top
     setScreen("welcome");
   };
 
@@ -142,17 +136,13 @@ function App() {
   };
 
   const handleRegistrationComplete = (profile: UserProfile) => {
-    const newUser = saveUser(profile);
-    setCurrentUser(newUser);
-    setUsers(getUsers()); // Reload users list
-    setUserProperties(newUser.nickname, newUser.grade);
-    setHistory([]); // New user has no history
+    saveUserProfile(profile);
+    setUserProfile(profile);
+    setUserProperties(profile.nickname, profile.grade);
     setScreen("welcome");
   };
 
-  // User Switch Logic
   const handleOpenUserSwitch = () => {
-    setUsers(getUsers()); // Refresh list
     setIsUserSwitchModalOpen(true);
   };
 
@@ -160,40 +150,21 @@ function App() {
     setIsUserSwitchModalOpen(false);
   };
 
-  const handleSelectUser = (userId: string) => {
-    switchUser(userId);
-    const user = getCurrentUser();
-    setCurrentUser(user);
-    if (user) {
-      setUserProperties(user.nickname, user.grade);
-      setHistory(getHistory()); // Load history for switched user
+  const handleSwitchUser = (userId: string) => {
+    setCurrentUser(userId);
+    const profile = getUserProfile();
+    if (profile) {
+      setUserProfile(profile);
+      setUserProperties(profile.nickname, profile.grade);
+      setHistory(getHistory()); // Load history for new user
+      setScreen("welcome"); // Reset to welcome screen
     }
     setIsUserSwitchModalOpen(false);
   };
 
-  const handleAddUser = () => {
+  const handleCreateNewUser = () => {
     setIsUserSwitchModalOpen(false);
     setScreen("registration");
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    const nextUser = deleteUser(userId);
-    setUsers(getUsers()); // Refresh list
-
-    // If the deleted user was the current user (or we were left with no users), update state
-    if (!nextUser && users.length <= 1) {
-       // All users deleted (or the last one was deleted)
-       setCurrentUser(null);
-       setScreen("registration");
-       setIsUserSwitchModalOpen(false);
-    } else if (currentUser?.id === userId) {
-       // Current user deleted, switched to another
-       setCurrentUser(nextUser);
-       if(nextUser) {
-           setUserProperties(nextUser.nickname, nextUser.grade);
-           setHistory(getHistory());
-       }
-    }
   };
 
   return (
@@ -210,8 +181,8 @@ function App() {
             onShowHistory={handleShowHistory}
             hasHistory={history.length > 0}
             onGoToSettings={handleGoToSettings}
-            userProfile={currentUser}
-            onSwitchUser={handleOpenUserSwitch}
+            userProfile={userProfile}
+            onOpenUserSwitch={handleOpenUserSwitch}
           />
         )}
         {screen === "history" && (
@@ -229,7 +200,7 @@ function App() {
         )}
         {screen === "quiz" && (
           <QuizScreen
-            key={`${level.id}-${answerMode}-${Date.now()}`}
+            key={`${level}-${answerMode}-${Date.now()}`}
             level={level}
             answerMode={answerMode}
             onQuizComplete={handleQuizComplete}
@@ -255,11 +226,10 @@ function App() {
       <UserSwitchModal
         isOpen={isUserSwitchModalOpen}
         onClose={handleCloseUserSwitch}
-        users={users}
-        currentUserId={currentUser?.id}
-        onSelectUser={handleSelectUser}
-        onAddUser={handleAddUser}
-        onDeleteUser={handleDeleteUser}
+        users={getUsers()}
+        currentUser={userProfile}
+        onSwitchUser={handleSwitchUser}
+        onCreateNewUser={handleCreateNewUser}
       />
     </div>
   );

@@ -1,27 +1,36 @@
-name: Deploy to Server
+name: Deploy Staging
 
 on:
   push:
     branches:
-      - main  # mainブランチに変更があった時（マージ含む）に実行
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: |
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            cd /var/www/app
-            git fetch origin
-            git reset --hard origin/main
-            npm install
-            npm run build
+          source: "public"
+          target: "/var/www/app"

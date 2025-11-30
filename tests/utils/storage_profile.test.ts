@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getUserProfile, saveUserProfile, getCurrentUser } from "../../src/utils/storage";
+import { getUserProfile, saveUserProfile, getUsers, setCurrentUser } from "../../src/utils/storage";
+import { USER_LIST_STORAGE_KEY, USER_PROFILE_STORAGE_KEY } from "../../src/constants";
 import { UserProfile } from "../../src/types";
 
 describe("Storage Utils - User Profile", () => {
@@ -15,6 +16,7 @@ describe("Storage Utils - User Profile", () => {
 
   it("should save and retrieve user profile", () => {
     const testProfile: UserProfile = {
+      id: "test-id-1",
       nickname: "TestUser",
       grade: 3,
     };
@@ -22,20 +24,41 @@ describe("Storage Utils - User Profile", () => {
     saveUserProfile(testProfile);
     const retrieved = getUserProfile();
 
-    expect(retrieved).not.toBeNull();
-    expect(retrieved?.nickname).toBe(testProfile.nickname);
-    expect(retrieved?.grade).toBe(testProfile.grade);
-    expect(retrieved?.id).toBeDefined(); // Now it has an ID
+    expect(retrieved).toEqual(testProfile);
   });
 
-  it("should return null if json parsing fails (simulated by corrupted users list)", () => {
-    // Note: getUserProfile now delegates to getCurrentUser, which reads from USERS_STORAGE_KEY.
-    // If USERS_STORAGE_KEY is corrupted, it should fail gracefully.
-    localStorage.setItem("quiz_users", "invalid-json");
+  it("should manage multiple users correctly", () => {
+    const user1: UserProfile = { id: "u1", nickname: "User1", grade: 1 };
+    const user2: UserProfile = { id: "u2", nickname: "User2", grade: 2 };
 
+    saveUserProfile(user1);
+    saveUserProfile(user2);
+
+    // After saving user2, it should be the current user
+    expect(getUserProfile()).toEqual(user2);
+
+    // Switch back to user1
+    setCurrentUser(user1.id);
+    expect(getUserProfile()).toEqual(user1);
+
+    // Verify all users are stored
+    const allUsers = getUsers();
+    expect(allUsers).toHaveLength(2);
+    expect(allUsers).toContainEqual(user1);
+    expect(allUsers).toContainEqual(user2);
+  });
+
+  it("should return null (or valid user if migration happens) if json parsing fails", () => {
+    // Note: getUserProfile now looks at USER_LIST_STORAGE_KEY primarily.
+    localStorage.setItem(USER_LIST_STORAGE_KEY, "invalid-json");
+
+    // Mock console.error to avoid noise in test output
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const profile = getUserProfile();
+    // It might return null, or try to migrate legacy key if list fails to parse.
+    // In current impl, if list parse fails, it returns [], then getUserProfile returns null (or tries to set default).
+
     expect(profile).toBeNull();
     expect(consoleSpy).toHaveBeenCalled();
   });

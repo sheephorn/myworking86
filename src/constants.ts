@@ -53,7 +53,7 @@ export const GRADES: readonly Grade[] = [
         id: "grade-4-multiplication",
         name: "2桁のかけ算",
         calculationPadAvailable: true,
-        numberOfQuestions: 3,
+        numberOfQuestions: 5,
         medalCriteria: DEFAULT_MEDAL_CRITERIA,
       },
     ],
@@ -69,3 +69,13 @@ export const SETTINGS_STORAGE_KEY = "quiz_settings";
  * localStorageにユーザープロフィールを保存する際のキー
  */
 export const USER_PROFILE_STORAGE_KEY = "quiz_user_profile";
+
+/**
+ * localStorageにユーザーリストを保存する際のキー
+ */
+export const USER_LIST_STORAGE_KEY = "quiz_users";
+
+/**
+ * localStorageに現在のユーザーIDを保存する際のキー
+ */
+export const CURRENT_USER_ID_STORAGE_KEY = "quiz_current_user_id";

@@ -29,9 +29,9 @@ interface WelcomeScreenProps {
    */
   userProfile: UserProfile | null;
   /**
-   * ユーザー切り替えボタンがクリックされたときに呼び出されるコールバック関数
+   * ユーザー切り替えモーダルを開くコールバック関数
    */
-  onSwitchUser: () => void;
+  onOpenUserSwitch: () => void;
 }
 
 /**
@@ -45,7 +45,7 @@ export default function WelcomeScreen({
   hasHistory,
   onGoToSettings,
   userProfile,
-  onSwitchUser,
+  onOpenUserSwitch,
 }: WelcomeScreenProps) {
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
@@ -137,19 +137,16 @@ export default function WelcomeScreen({
         </h1>
         {userProfile && (
           <div className="mb-2 flex items-center justify-center gap-2">
-             <div className="text-xl font-black text-slate-700 bg-blue-50 py-2 px-4 rounded-xl inline-flex items-center">
-              <span>{userProfile.nickname}さん <span className="text-slate-500 text-lg font-bold">({userProfile.grade}ねんせい)</span></span>
+            <div className="text-xl font-black text-slate-700 bg-blue-50 py-2 px-4 rounded-xl">
+              {userProfile.nickname}さん <span className="text-slate-500 text-lg font-bold">({userProfile.grade}ねんせい)</span>
             </div>
             <button
-              onClick={onSwitchUser}
-              className="p-2 text-brand-blue hover:text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all"
+              onClick={onOpenUserSwitch}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-500 p-2 rounded-xl transition-colors"
               aria-label="ユーザーを切り替える"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
           </div>
