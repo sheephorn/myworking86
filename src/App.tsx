@@ -24,6 +24,7 @@ import {
   getUsers,
   setCurrentUser,
   deleteUserProfile,
+  updateLevelStats,
 } from "./utils/storage";
 import { setUserProperties, trackQuizComplete } from "./utils/analytics";
 import { GRADES } from "./constants";
@@ -95,6 +96,9 @@ function App() {
       time,
       grade,
     });
+
+    // Update level stats (best score, etc.)
+    updateLevelStats(level.id, score, time);
 
     // Update local history state so the welcome screen button updates immediately if we go back
     setHistory(getHistory());
