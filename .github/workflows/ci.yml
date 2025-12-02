@@ -4,8 +4,6 @@ on:
   workflow_call:  # Allow this workflow to be called by other workflows
   pull_request:
     branches: [main, develop]
-  push:
-    branches: [main, develop]
 
 jobs:
   lint-and-test:
