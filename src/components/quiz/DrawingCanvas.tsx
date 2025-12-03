@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
-import { getStroke } from 'perfect-freehand';
+import { getStroke, StrokeOptions } from 'perfect-freehand';
 import { getSettings, saveSettings } from '../../utils/storage';
 
 export interface DrawingCanvasHandle {
@@ -70,7 +70,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
   const renderStrokeToContext = (
     ctx: CanvasRenderingContext2D,
     points: number[][],
-    options: any
+    options: StrokeOptions
   ) => {
     const stroke = getStroke(points, options);
     const pathData = getSvgPathFromStroke(stroke);
@@ -82,7 +82,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
     if (e.cancelable) e.preventDefault();
 
     const overlayCanvas = overlayCanvasRef.current;
-    if (!overlayCanvas) return;
+    const overlayCtx = overlayContextRef.current;
+    if (!overlayCanvas || !overlayCtx) return;
 
     try {
       overlayCanvas.setPointerCapture(e.pointerId);
@@ -92,6 +93,20 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
 
     const { x, y, pressure } = getCoordinates(e, overlayCanvas);
     pointsRef.current = [[x, y, pressure]];
+
+    // Render initial point (for dots/taps)
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    const options = {
+      size: penSizeRef.current * 2,
+      thinning: 0.5,
+      smoothing: 0.5,
+      streamline: 0.5,
+      simulatePressure: e.pointerType !== 'pen',
+      last: false,
+    };
+
+    renderStrokeToContext(overlayCtx, pointsRef.current, options);
   };
 
   const draw = (e: PointerEvent) => {
@@ -117,7 +132,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
 
     // perfect-freehand options
     const options = {
-      size: penSizeRef.current * 2, // Scale up slightly as perfect-freehand handles pressure dynamically
+      size: penSizeRef.current * 2,
       thinning: 0.5,
       smoothing: 0.5,
       streamline: 0.5,
@@ -145,11 +160,24 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
             // ignore
         }
 
-        // Final render of the stroke (simulate 'last: true' if needed, though usually fine as is)
-        // We draw the final state from the overlay onto the main canvas
+        // Render final tapered stroke on Overlay Canvas before committing
+        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+        const options = {
+          size: penSizeRef.current * 2,
+          thinning: 0.5,
+          smoothing: 0.5,
+          streamline: 0.5,
+          simulatePressure: e.pointerType !== 'pen',
+          last: true, // This enables tapering at the end
+        };
+
+        renderStrokeToContext(overlayCtx, pointsRef.current, options);
+
+        // Commit final state from overlay to main canvas
         mainCtx.drawImage(overlayCanvas, 0, 0);
 
-        // Clear the overlay
+        // Clear the overlay for next stroke
         overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     }
 
