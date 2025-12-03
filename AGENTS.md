@@ -28,6 +28,8 @@ This document outlines the rules and guidelines for AI agents working on this re
 4.  **Lint**: Run `npm run lint` and resolve any errors.
 5.  **Document**: Update the relevant files in `doc/design/` with new features or logic changes.
 6.  **Submit**: Ensure all tests pass before submitting.
+    *   **CRITICAL**: You **MUST** run `npm run lint` and `npm test` before creating a Pull Request.
+    *   **DO NOT** submit a PR if there are any lint errors or test failures. Fix them first.
 
 ## 4. Project Structure
 
