@@ -12,7 +12,7 @@ type VisualType = 'normal' | 'gold' | 'rainbow';
 const FAKE_GOLD_CHANCE = 0.085;
 
 // Gacha Capsule Component
-const GachaCapsule: React.FC<{ type: VisualType; color?: string; className?: string }> = ({ type, color = 'bg-blue-500', className = '' }) => {
+const GachaCapsule: React.FC<{ type: VisualType; color?: string; className?: string; isOpening?: boolean }> = ({ type, color = 'bg-blue-500', className = '', isOpening = false }) => {
   const getTopStyle = () => {
     if (type === 'rainbow') {
       return 'bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)]';
@@ -24,18 +24,29 @@ const GachaCapsule: React.FC<{ type: VisualType; color?: string; className?: str
   };
 
   return (
-    <div className={`relative w-48 h-48 rounded-full shadow-xl overflow-hidden border-4 border-black/10 ${className}`}>
-      {/* Top Half */}
-      <div className={`absolute top-0 left-0 w-full h-1/2 ${getTopStyle()} z-10`}>
-        {/* Highlight */}
-        <div className="absolute top-2 left-4 w-8 h-4 bg-white/40 rounded-full rotate-[-15deg]"></div>
+    <div className={`relative w-48 h-48 ${className}`}>
+      {/* Light Rays (Behind Capsule) */}
+      {isOpening && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] z-0 animate-ray-burst">
+          <div className="w-full h-full bg-[conic-gradient(from_0deg,transparent_0deg,gold_10deg,transparent_20deg,gold_30deg,transparent_40deg,gold_50deg,transparent_60deg,gold_70deg,transparent_80deg,gold_90deg,transparent_100deg,gold_110deg,transparent_120deg,gold_130deg,transparent_140deg,gold_150deg,transparent_160deg,gold_170deg,transparent_180deg,gold_190deg,transparent_200deg,gold_210deg,transparent_220deg,gold_230deg,transparent_240deg,gold_250deg,transparent_260deg,gold_270deg,transparent_280deg,gold_290deg,transparent_300deg,gold_310deg,transparent_320deg,gold_330deg,transparent_340deg,gold_350deg,transparent_360deg)] opacity-60"></div>
+        </div>
+      )}
+
+      {/* Capsule Body */}
+      <div className="relative w-full h-full rounded-full shadow-xl overflow-hidden border-4 border-black/10 bg-transparent z-10">
+         {/* Top Half */}
+        <div className={`absolute top-0 left-0 w-full h-1/2 ${getTopStyle()} z-20 origin-bottom ${isOpening ? 'animate-capsule-open-top' : ''}`}>
+          {/* Highlight */}
+          <div className="absolute top-2 left-4 w-8 h-4 bg-white/40 rounded-full rotate-[-15deg]"></div>
+        </div>
+
+        {/* Bottom Half */}
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white/90 z-10"></div>
+
+        {/* Middle Belt (attached to bottom half conceptually, but for now just z-index managed) */}
+        {/* We hide the belt when opening because the top moves away. Actually the belt is usually part of the bottom or top. Let's keep it simple. */}
+        <div className={`absolute top-1/2 left-0 w-full h-0 border-t-4 border-black/5 z-30 -translate-y-1/2 ${isOpening ? 'opacity-0 transition-opacity duration-100' : ''}`}></div>
       </div>
-      
-      {/* Bottom Half */}
-      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white/90 z-10"></div>
-      
-      {/* Middle Belt */}
-      <div className="absolute top-1/2 left-0 w-full h-0 border-t-4 border-black/5 z-20 -translate-y-1/2"></div>
     </div>
   );
 };
@@ -85,7 +96,7 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
       return () => clearTimeout(timer);
     }
     if (status === 'opening') {
-      const timer = setTimeout(() => setStatus('result'), 500); // 0.5s flash
+      const timer = setTimeout(() => setStatus('result'), 800); // 0.8s for opening animation
       return () => clearTimeout(timer);
     }
   }, [status]);
@@ -209,10 +220,7 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
       {/* Dynamic Background during Shaking */}
       {(status === 'shaking' || status === 'opening') && renderShakingBackground()}
 
-      {/* Opening Flash Overlay */}
-      {status === 'opening' && (
-        <div className="absolute inset-0 bg-white z-50 animate-open-flash rounded-3xl pointer-events-none"></div>
-      )}
+      {/* Opening Flash Overlay - REMOVED */}
 
       <h1 className="text-3xl font-bold text-slate-800 mb-8 tracking-wider">どうぶつガチャ</h1>
 
@@ -227,9 +235,9 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
         {(status === 'dropping' || status === 'shaking' || status === 'opening') && (
           <div className={`relative ${
             status === 'dropping' ? 'animate-drop-bounce' : 
-            visualType === 'rainbow' ? 'animate-shake-crazy' : 'animate-shake-hard'
+            status === 'shaking' ? 'animate-sway' : ''
           }`}>
-             <GachaCapsule type={visualType} color={capsuleColor} />
+             <GachaCapsule type={visualType} color={capsuleColor} isOpening={status === 'opening'} />
              {/* Glow effect for high rarity */}
              {(visualType === 'gold' || visualType === 'rainbow') && (
                <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-40 -z-10 animate-pulse"></div>

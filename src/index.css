@@ -147,50 +147,33 @@ body {
   animation: drop-bounce 1s both;
 }
 
-@keyframes shake-hard {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  10% { transform: translate(-10px, -10px) rotate(-10deg); }
-  20% { transform: translate(10px, 10px) rotate(10deg); }
-  30% { transform: translate(-10px, 10px) rotate(-10deg); }
-  40% { transform: translate(10px, -10px) rotate(10deg); }
-  50% { transform: translate(-10px, -10px) rotate(-10deg); }
-  60% { transform: translate(10px, 10px) rotate(10deg); }
-  70% { transform: translate(-10px, 10px) rotate(-10deg); }
-  80% { transform: translate(10px, -10px) rotate(10deg); }
-  90% { transform: translate(-5px, -5px) rotate(-5deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
 }
 
-.animate-shake-hard {
-  animation: shake-hard 0.3s ease-in-out infinite;
+.animate-sway {
+  animation: sway 1s ease-in-out infinite;
 }
 
-@keyframes shake-crazy {
-  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  10% { transform: translate(-15px, -15px) rotate(-20deg) scale(1.1); }
-  20% { transform: translate(15px, 15px) rotate(20deg) scale(0.9); }
-  30% { transform: translate(-15px, 15px) rotate(-20deg) scale(1.1); }
-  40% { transform: translate(15px, -15px) rotate(20deg) scale(0.9); }
-  50% { transform: translate(-15px, -15px) rotate(-20deg) scale(1.1); }
-  60% { transform: translate(15px, 15px) rotate(20deg) scale(0.9); }
-  70% { transform: translate(-15px, 15px) rotate(-20deg) scale(1.1); }
-  80% { transform: translate(15px, -15px) rotate(20deg) scale(0.9); }
-  90% { transform: translate(-5px, -5px) rotate(-10deg) scale(1); }
-  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+@keyframes capsule-open-top {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-120%) rotate(-15deg); }
 }
 
-.animate-shake-crazy {
-  animation: shake-crazy 0.2s ease-in-out infinite;
+.animate-capsule-open-top {
+  animation: capsule-open-top 0.5s ease-out forwards;
 }
 
-@keyframes open-flash {
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  100% { opacity: 0; }
+@keyframes ray-burst {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(3) rotate(45deg); opacity: 0; }
 }
 
-.animate-open-flash {
-  animation: open-flash 0.8s ease-out forwards;
+.animate-ray-burst {
+  animation: ray-burst 1s ease-out forwards;
 }
 
 @keyframes spin-fast {
