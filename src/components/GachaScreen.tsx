@@ -34,7 +34,7 @@ const GachaCapsule: React.FC<{ type: VisualType; color?: string; className?: str
 
       {/* Capsule Body */}
       <div className="relative w-full h-full rounded-full shadow-xl overflow-hidden border-4 border-black/10 bg-transparent z-10">
-         {/* Top Half */}
+        {/* Top Half */}
         <div className={`absolute top-0 left-0 w-full h-1/2 ${getTopStyle()} z-20 origin-bottom ${isOpening ? 'animate-capsule-open-top' : ''}`}>
           {/* Highlight */}
           <div className="absolute top-2 left-4 w-8 h-4 bg-white/40 rounded-full rotate-[-15deg]"></div>
@@ -128,7 +128,7 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
   };
 
   const getResultEffect = (rarity: string) => {
-     if (rarity === 'UR') {
+    if (rarity === 'UR') {
       return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Rotating rays */}
@@ -155,8 +155,8 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
     if (rarity === 'SR') {
       return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-             {/* Sparkles */}
-             {[...Array(10)].map((_, i) => (
+          {/* Sparkles */}
+          {[...Array(10)].map((_, i) => (
             <div
               key={i}
               className="absolute text-yellow-400 animate-pulse text-2xl"
@@ -180,33 +180,33 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
     if (visualType === 'normal') return null;
 
     const isRainbow = visualType === 'rainbow';
-    
+
     return (
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 rounded-3xl">
         {/* Concentrated Lines / Sunburst */}
-         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] ${isRainbow ? 'animate-spin-fast' : 'animate-spin-slow'} opacity-20`}>
-            <div className={`w-full h-full ${isRainbow 
-              ? 'bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)]' 
-              : 'bg-[conic-gradient(from_0deg,transparent_0deg,gold_10deg,transparent_20deg,gold_30deg,transparent_40deg,gold_50deg,transparent_60deg,gold_70deg,transparent_80deg,gold_90deg,transparent_100deg,gold_110deg,transparent_120deg,gold_130deg,transparent_140deg,gold_150deg,transparent_160deg,gold_170deg,transparent_180deg,gold_190deg,transparent_200deg,gold_210deg,transparent_220deg,gold_230deg,transparent_240deg,gold_250deg,transparent_260deg,gold_270deg,transparent_280deg,gold_290deg,transparent_300deg,gold_310deg,transparent_320deg,gold_330deg,transparent_340deg,gold_350deg,transparent_360deg)]'
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] ${isRainbow ? 'animate-spin-fast' : 'animate-spin-slow'} opacity-20`}>
+          <div className={`w-full h-full ${isRainbow
+            ? 'bg-[conic-gradient(from_0deg,red,orange,yellow,green,blue,indigo,violet,red)]'
+            : 'bg-[conic-gradient(from_0deg,transparent_0deg,gold_10deg,transparent_20deg,gold_30deg,transparent_40deg,gold_50deg,transparent_60deg,gold_70deg,transparent_80deg,gold_90deg,transparent_100deg,gold_110deg,transparent_120deg,gold_130deg,transparent_140deg,gold_150deg,transparent_160deg,gold_170deg,transparent_180deg,gold_190deg,transparent_200deg,gold_210deg,transparent_220deg,gold_230deg,transparent_240deg,gold_250deg,transparent_260deg,gold_270deg,transparent_280deg,gold_290deg,transparent_300deg,gold_310deg,transparent_320deg,gold_330deg,transparent_340deg,gold_350deg,transparent_360deg)]'
             }`}></div>
-         </div>
-         
-         {/* Flashy particles */}
-         {[...Array(15)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-sparkle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                fontSize: `${Math.random() * 20 + 20}px`,
-                animationDuration: `${Math.random() * 0.5 + 0.5}s`,
-                animationDelay: `${Math.random() * 2}s`
-              }}
-            >
-              {isRainbow ? '🌟' : '✨'}
-            </div>
-         ))}
+        </div>
+
+        {/* Flashy particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-sparkle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              fontSize: `${Math.random() * 20 + 20}px`,
+              animationDuration: `${Math.random() * 0.5 + 0.5}s`,
+              animationDelay: `${Math.random() * 2}s`
+            }}
+          >
+            {isRainbow ? '🌟' : '✨'}
+          </div>
+        ))}
       </div>
     );
   };
@@ -223,6 +223,7 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
       {/* Opening Flash Overlay - REMOVED */}
 
       <h1 className="text-3xl font-bold text-slate-800 mb-8 tracking-wider">どうぶつガチャ</h1>
+      <h3 className="text-3xl text-slate-800 mb-8 tracking-wider">お試し中</h3>
 
       <div className="flex-1 w-full flex items-center justify-center min-h-[300px] mb-8 relative">
         {status === 'idle' && (
@@ -233,15 +234,14 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
         )}
 
         {(status === 'dropping' || status === 'shaking' || status === 'opening') && (
-          <div className={`relative ${
-            status === 'dropping' ? 'animate-drop-bounce' : 
+          <div className={`relative ${status === 'dropping' ? 'animate-drop-bounce' :
             status === 'shaking' ? 'animate-sway' : ''
-          }`}>
-             <GachaCapsule type={visualType} color={capsuleColor} isOpening={status === 'opening'} />
-             {/* Glow effect for high rarity */}
-             {(visualType === 'gold' || visualType === 'rainbow') && (
-               <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-40 -z-10 animate-pulse"></div>
-             )}
+            }`}>
+            <GachaCapsule type={visualType} color={capsuleColor} isOpening={status === 'opening'} />
+            {/* Glow effect for high rarity */}
+            {(visualType === 'gold' || visualType === 'rainbow') && (
+              <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-40 -z-10 animate-pulse"></div>
+            )}
           </div>
         )}
 
@@ -285,12 +285,12 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
         </button>
 
         {status === 'result' ? (
-           <button
-           onClick={handleReset}
-           className="flex-1 py-3 px-6 rounded-full font-bold text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-md border-b-4 border-blue-700 active:border-b-0 active:translate-y-1"
-         >
-           もういちど
-         </button>
+          <button
+            onClick={handleReset}
+            className="flex-1 py-3 px-6 rounded-full font-bold text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-md border-b-4 border-blue-700 active:border-b-0 active:translate-y-1"
+          >
+            もういちど
+          </button>
         ) : (
           <button
             onClick={handlePull}
