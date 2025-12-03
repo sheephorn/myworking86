@@ -1,0 +1,231 @@
+import React, { useState } from "react";
+
+/**
+ * 計算パッドコンポーネントのprops
+ */
+interface CalculationPadProps {
+  /**
+   * 掛け算の最初の数値（被乗数）
+   */
+  num1: number;
+  /**
+   * 掛け算の2番目の数値（乗数）
+   */
+  num2: number;
+  onSubmit: (answer: number) => void;
+  onNextQuestion: () => void;
+  isCorrectionMode: boolean;
+  correctAnswer: number;
+}
+
+const CalculationPad: React.FC<CalculationPadProps> = ({
+  num1,
+  num2,
+  onSubmit,
+  onNextQuestion,
+  isCorrectionMode,
+  correctAnswer,
+}) => {
+  const [grid, setGrid] = useState<string[][]>(
+    Array(3)
+      .fill(null)
+      .map(() => Array(4).fill(""))
+  );
+  const [activeCell, setActiveCell] = useState<{ row: number; col: number } | null>({ row: 0, col: 3 });
+  // Calculate correction state directly during render
+  const answerString = grid[2].join("");
+  const answerNum = parseInt(answerString, 10) || 0;
+
+  const incorrectIndexes: number[] = [];
+  let isCorrectionComplete = false;
+
+  if (isCorrectionMode) {
+    const correctStr = String(correctAnswer).padStart(4, ' ');
+    const currentAnswerRow = grid[2];
+    let isFullyCorrect = true;
+
+    for (let i = 0; i < 4; i++) {
+      const userDigit = currentAnswerRow[i] === '' ? ' ' : currentAnswerRow[i];
+      if (userDigit !== correctStr[i]) {
+        incorrectIndexes.push(8 + i); // Row 2 starts at index 8
+        isFullyCorrect = false;
+      }
+    }
+    isCorrectionComplete = isFullyCorrect && answerNum === correctAnswer;
+  }
+
+
+  const handleCellClick = (row: number, col: number) => {
+    setActiveCell({ row, col });
+  };
+
+  const advanceCursor = () => {
+    if (activeCell) {
+      const nextCol = activeCell.col - 1;
+      if (nextCol >= 0) {
+        setActiveCell({ row: activeCell.row, col: nextCol });
+      } else if (activeCell.row < 2) {
+        setActiveCell({ row: activeCell.row + 1, col: 3 });
+      } else {
+        setActiveCell(null);
+      }
+    }
+  };
+
+  const handleNumpadClick = (num: string) => {
+    if (activeCell) {
+      const newGrid = grid.map((r) => [...r]);
+      newGrid[activeCell.row][activeCell.col] = num;
+      setGrid(newGrid);
+      advanceCursor();
+    }
+  };
+
+  const handleBackspaceClick = () => {
+    // Define the order of cells as they are filled (top-to-bottom, right-to-left)
+    const cellOrder: { row: number; col: number }[] = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 3; c >= 0; c--) {
+        cellOrder.push({ row: r, col: c });
+      }
+    }
+
+    // Find the last cell that was filled by searching backwards through the fill order
+    let lastFilledCell: { row: number; col: number } | null = null;
+    for (let i = cellOrder.length - 1; i >= 0; i--) {
+      const { row, col } = cellOrder[i];
+      if (grid[row][col] !== "") {
+        lastFilledCell = { row, col };
+        break;
+      }
+    }
+
+    if (lastFilledCell) {
+      // Clear the found cell and move the active cursor to it
+      const { row, col } = lastFilledCell;
+      const newGrid = grid.map((r) => [...r]);
+      newGrid[row][col] = "";
+      setGrid(newGrid);
+      setActiveCell({ row, col });
+    }
+  };
+
+  const handleNextClick = () => {
+    advanceCursor();
+  };
+
+  const handleSubmit = () => {
+    const answerString = grid[2].join("");
+    if (answerString) {
+      onSubmit(parseInt(answerString, 10));
+    }
+  };
+
+  const num1Digits = num1.toString().padStart(4, " ").split("");
+  const num2Digits = num2.toString().padStart(4, " ").split("");
+
+  return (
+    <div className="w-full max-w-xs mr-auto p-4 bg-slate-100 rounded-lg">
+      <div className="tabular-nums">
+        <div className="flex space-x-1 mb-1 justify-center">
+          <div className="w-12 h-12 text-2xl flex items-center justify-center"></div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center"></div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center">{num1Digits[2]}</div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center">{num1Digits[3]}</div>
+        </div>
+        <div className="flex space-x-1 justify-center">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center"></div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center">{num2Digits[2]}</div>
+          <div className="w-12 h-12 text-2xl flex items-center justify-center">{num2Digits[3]}</div>
+        </div>
+        <div className="flex justify-center">
+          <hr className="border-black my-1 w-[13rem]" />
+        </div>
+        <div className="space-y-1 mt-1">
+          {grid.map((row, rowIndex) => (
+            <React.Fragment key={rowIndex}>
+              <div className="flex space-x-1 justify-center">
+                {row.map((cell, colIndex) => (
+                  <div
+                    key={colIndex}
+                    data-testid={`cell-${rowIndex}-${colIndex}`}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                    className={`w-12 h-12 text-2xl flex items-center justify-center border-2 rounded ${
+                      activeCell?.row === rowIndex && activeCell?.col === colIndex
+                        ? "border-blue-500 bg-blue-100"
+                        : incorrectIndexes.includes(rowIndex * 4 + colIndex)
+                        ? "border-red-500 bg-red-100"
+                        : "border-gray-300"
+                    } cursor-pointer`}
+                  >
+                    {cell}
+                  </div>
+                ))}
+              </div>
+              {rowIndex === 1 && (
+                <div className="flex justify-center">
+                  <hr className="border-black my-1 w-[13rem]" />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 w-full mt-4">
+        {/* Row 1 */}
+        <button onClick={() => handleNumpadClick('7')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">7</button>
+        <button onClick={() => handleNumpadClick('8')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">8</button>
+        <button onClick={() => handleNumpadClick('9')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">9</button>
+
+        {/* Row 2 */}
+        <button onClick={() => handleNumpadClick('4')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">4</button>
+        <button onClick={() => handleNumpadClick('5')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">5</button>
+        <button onClick={() => handleNumpadClick('6')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">6</button>
+
+        {/* Row 3 */}
+        <button onClick={() => handleNumpadClick('1')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">1</button>
+        <button onClick={() => handleNumpadClick('2')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">2</button>
+        <button onClick={() => handleNumpadClick('3')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">3</button>
+
+        {/* Row 4 */}
+        <button onClick={handleBackspaceClick} className="w-full h-12 text-xl bg-yellow-500 text-white border rounded-lg hover:bg-yellow-600">もどる</button>
+        <button onClick={() => handleNumpadClick('0')} className="w-full h-12 text-2xl bg-white border rounded-lg hover:bg-gray-200">0</button>
+        <button onClick={handleNextClick} className="w-full h-12 text-xl bg-white border rounded-lg hover:bg-gray-200">次へ</button>
+
+        {/* Row 5 */}
+        <button
+          data-testid="submit-button"
+          onClick={isCorrectionMode ? onNextQuestion : handleSubmit}
+          disabled={isCorrectionMode && !isCorrectionComplete}
+          className="col-span-3 w-full h-12 text-xl bg-blue-500 text-white border rounded-lg hover:bg-blue-600 disabled:bg-slate-400 disabled:cursor-not-allowed"
+        >
+          {isCorrectionMode ? "次の問題へ" : "こたえる"}
+        </button>
+      </div>
+      {isCorrectionMode && (
+        <div className="mt-4 text-center">
+          <p className="text-sm text-slate-500">こたえ</p>
+          <p className="text-2xl font-bold text-green-600">{correctAnswer}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CalculationPad;

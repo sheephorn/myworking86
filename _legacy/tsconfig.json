@@ -13,15 +13,14 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["vitest/globals"],
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "types": ["vite/client", "node"]
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["resources/js"],
-  "exclude": ["node_modules", "public"]
+  "include": ["src", "tests"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

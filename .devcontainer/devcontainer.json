@@ -1,8 +1,13 @@
 {
-  "name": "Node.js & Playwright",
+  "name": "Laravel & React (Inertia)",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {}
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/php:1": {
+      "version": "8.2",
+      "installComposer": true,
+      "additionalExtensions": "mbstring,xml,mysql,sqlite3,curl,zip,bcmath,intl"
+    }
   },
   "customizations": {
     "vscode": {
@@ -10,15 +15,18 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "bmewburn.vscode-intelephense-client",
+        "amiralizadeh9480.laravel-extra-intellisense"
       ]
     }
   },
-  "postCreateCommand": "npm install && npx playwright install --with-deps",
+  "postCreateCommand": "if [ -f setup_laravel.sh ]; then sudo chmod +x setup_laravel.sh; fi",
   "containerEnv": {
     "TZ": "Asia/Tokyo"
   },
   "forwardPorts": [
+    8000,
     5173
   ]
 }

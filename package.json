@@ -1,63 +1,43 @@
 {
-  "name": "myworking86",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "vitest",
-    "test:e2e": "playwright test",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "prepare": "husky"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sheephorn/myworking86.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/sheephorn/myworking86/issues"
-  },
-  "homepage": "https://github.com/sheephorn/myworking86#readme",
-  "dependencies": {
-    "perfect-freehand": "^1.2.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
-  },
-  "lint-staged": {
-    "*.{js,jsx,mjs,cjs,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,html,css}": [
-      "prettier --write"
-    ]
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@testing-library/react": "^16.3.0",
-    "@types/react": "^19.2.6",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
-    "@vitest/coverage-v8": "^4.0.14",
-    "eslint": "^9.39.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "globals": "^16.5.0",
-    "husky": "^9.1.7",
-    "jsdom": "^27.2.0",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.7.3",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vite": "^7.2.4",
-    "vitest": "^4.0.14"
-  }
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "lint": "eslint resources/js --ext .ts,.tsx",
+        "format": "prettier --write resources/js"
+    },
+    "devDependencies": {
+        "@inertiajs/react": "^1.0.0",
+        "@types/node": "^18.13.0",
+        "@types/react": "^18.0.28",
+        "@types/react-dom": "^18.0.11",
+        "@vitejs/plugin-react": "^4.0.0",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.6.0",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.31",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.1",
+        "typescript": "^5.0.2",
+        "vite": "^5.0.0",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-react": "^7.34.1",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "prettier": "^3.2.5",
+        "typescript-eslint": "^7.7.0",
+        "globals": "^15.0.0"
+    },
+    "dependencies": {
+        "@headlessui/react": "^1.7.19",
+        "@heroicons/react": "^2.1.3",
+        "clsx": "^2.1.0",
+        "framer-motion": "^10.16.4",
+        "lucide-react": "^0.363.0",
+        "perfect-freehand": "^1.2.0",
+        "react-confetti": "^6.1.0",
+        "tailwind-merge": "^2.2.2"
+    }
 }
