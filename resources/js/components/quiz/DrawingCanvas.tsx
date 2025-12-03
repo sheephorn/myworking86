@@ -123,8 +123,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
 
     // Add new points
     events.forEach(event => {
-        const { x, y, pressure } = getCoordinates(event, overlayCanvas);
-        pointsRef.current.push([x, y, pressure]);
+      const { x, y, pressure } = getCoordinates(event, overlayCanvas);
+      pointsRef.current.push([x, y, pressure]);
     });
 
     // Clear overlay and draw current stroke
@@ -154,31 +154,19 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
     const mainCtx = mainContextRef.current;
 
     if (overlayCanvas && overlayCtx && mainCtx && mainCanvas) {
-        try {
-            overlayCanvas.releasePointerCapture(e.pointerId);
-        } catch {
-            // ignore
-        }
+      try {
+        overlayCanvas.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
 
-        // Render final tapered stroke on Overlay Canvas before committing
-        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      // Commit final state from overlay to main canvas
+      // We use drawImage to ensure exactly what was seen is committed, preventing flicker.
+      // We skip the 'last: true' tapering to ensure visual consistency.
+      mainCtx.drawImage(overlayCanvas, 0, 0);
 
-        const options = {
-          size: penSizeRef.current * 2,
-          thinning: 0.5,
-          smoothing: 0.5,
-          streamline: 0.5,
-          simulatePressure: e.pointerType !== 'pen',
-          last: true, // This enables tapering at the end
-        };
-
-        renderStrokeToContext(overlayCtx, pointsRef.current, options);
-
-        // Commit final state from overlay to main canvas
-        mainCtx.drawImage(overlayCanvas, 0, 0);
-
-        // Clear the overlay for next stroke
-        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      // Clear the overlay for next stroke
+      overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     }
 
     // Reset points
@@ -186,7 +174,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
   };
 
   const preventDefaultHandler = (e: Event) => {
-      e.preventDefault();
+    e.preventDefault();
   };
 
   // --- Initialization & Resizing ---
@@ -231,9 +219,9 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
 
       // Resize Overlay Canvas (always clear)
       if (overlayCanvas.width !== newWidth || overlayCanvas.height !== newHeight) {
-          overlayCanvas.width = newWidth;
-          overlayCanvas.height = newHeight;
-          overlayCtx.fillStyle = '#000000'; // Reset fillStyle after resize
+        overlayCanvas.width = newWidth;
+        overlayCanvas.height = newHeight;
+        overlayCtx.fillStyle = '#000000'; // Reset fillStyle after resize
       }
     };
 
@@ -241,7 +229,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
     window.addEventListener('resize', resizeCanvas);
 
     const resizeObserver = new ResizeObserver(() => {
-       window.requestAnimationFrame(resizeCanvas);
+      window.requestAnimationFrame(resizeCanvas);
     });
     resizeObserver.observe(container);
 
@@ -267,17 +255,17 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
       overlayCanvas.removeEventListener('pointercancel', stopDrawing);
       overlayCanvas.removeEventListener('contextmenu', preventDefaultHandler);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clearCanvas = () => {
     const mainCanvas = mainCanvasRef.current;
     const overlayCanvas = overlayCanvasRef.current;
     if (mainCanvas && mainContextRef.current) {
-        mainContextRef.current.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+      mainContextRef.current.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     }
     if (overlayCanvas && overlayContextRef.current) {
-        overlayContextRef.current.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      overlayContextRef.current.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     }
     pointsRef.current = [];
   };
@@ -294,36 +282,36 @@ const DrawingCanvas = forwardRef<DrawingCanvasHandle>((_, ref) => {
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden isolate select-none">
-      <div className="absolute top-2 left-4 text-slate-400 font-bold select-none pointer-events-none z-10">
+      <div className="absolute top-2 left-4 text-slate-400 font-bold select-none pointer-events-none z-20">
         けいさん用紙
       </div>
 
       {/* Main Canvas (Bottom Layer: Committed Strokes) */}
       <canvas
         ref={mainCanvasRef}
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
+        style={{ zIndex: 1 }}
       />
 
       {/* Overlay Canvas (Top Layer: Active Stroke & Input) */}
       <canvas
         ref={overlayCanvasRef}
-        className="absolute inset-0 cursor-crosshair z-0"
+        className="absolute inset-0 cursor-crosshair z-10"
         style={{ touchAction: 'none' }}
       />
 
       {/* Controls Container */}
-      <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+      <div className="absolute top-2 right-2 flex items-center gap-2 z-20">
         {/* Pen Size Controls */}
         <div className="flex bg-white/80 rounded-full p-1 shadow-sm border border-slate-200">
           {PEN_SIZES.map((item) => (
             <button
               key={item.size}
               onClick={() => handleChangePenSize(item.size)}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                penSize === item.size
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-              }`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${penSize === item.size
+                ? 'bg-slate-800 text-white'
+                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                }`}
               aria-label={`ペンサイズ: ${item.label}`}
               title={`${item.label} (${item.size}px)`}
             >

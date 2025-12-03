@@ -30,14 +30,14 @@ export default defineConfig({
             '@': '/resources/js',
         },
     },
+    define: {
+        __BUILD_VERSION__: JSON.stringify(new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }))
+    },
     test: {
         globals: true,
         environment: 'jsdom',
         setupFiles: ['./tests/setup.ts'],
         include: ['tests/Frontend/**/*.{test,spec}.{js,ts,jsx,tsx}'],
         exclude: ['tests/Frontend/e2e/**', 'node_modules/**'],
-        define: {
-            __BUILD_VERSION__: JSON.stringify('test-version'),
-        },
     },
 });
