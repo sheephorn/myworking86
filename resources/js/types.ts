@@ -1,3 +1,5 @@
+import { LucideIcon } from 'lucide-react';
+
 /**
  * 利用可能なゲームレベルIDを表す型。
  * NOTE: 循環依存を避けるため、`constants.ts`から動的に生成する代わりに手動で定義しています。
@@ -26,7 +28,7 @@ export interface BreadcrumbItem {
 export interface NavItem {
   title: string;
   href: string;
-  icon?: any; // Avoiding complex import for now, or use generic
+  icon?: LucideIcon;
   isActive?: boolean;
 }
 

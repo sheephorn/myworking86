@@ -1,6 +1,6 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import PrizeList from '../../../resources/js/pages/PrizeList';
 import React from 'react';
 
@@ -23,7 +23,7 @@ describe('PrizeList Component', () => {
     });
 
     it('displays loading state initially', () => {
-        (global.fetch as any).mockImplementation(() => new Promise(() => { })); // Never resolves
+        (global.fetch as Mock).mockImplementation(() => new Promise(() => { })); // Never resolves
         render(<PrizeList />);
         expect(screen.getByText('Loading...')).toBeDefined();
     });
@@ -34,7 +34,7 @@ describe('PrizeList Component', () => {
             { prize_id: 'sr-a-1', rarity: 'SR', count: 2 },
         ];
 
-        (global.fetch as any).mockResolvedValue({
+        (global.fetch as Mock).mockResolvedValue({
             json: async () => mockPrizes,
         });
 
@@ -42,19 +42,19 @@ describe('PrizeList Component', () => {
 
         // Wait for the dragon to appear
         await waitFor(() => {
-            expect(screen.getByText('ドラゴン')).toBeDefined();
+            expect(screen.getByText('伝説のドラゴン')).toBeDefined();
         });
 
         expect(screen.queryByText('Loading...')).toBeNull();
         expect(screen.getByText('Owned: 1')).toBeDefined();
 
         // Check for "Lion" (sr-a-1)
-        expect(screen.getByText('ライオン')).toBeDefined();
+        expect(screen.getByText('百獣の王ライオン')).toBeDefined();
         expect(screen.getByText('Owned: 2')).toBeDefined();
     });
 
     it('displays empty message when no prizes', async () => {
-        (global.fetch as any).mockResolvedValue({
+        (global.fetch as Mock).mockResolvedValue({
             json: async () => [],
         });
 
