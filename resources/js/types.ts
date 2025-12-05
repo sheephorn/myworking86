@@ -52,7 +52,8 @@ export type Screen =
   | "settings"
   | "selectAnswerMode"
   | "registration"
-  | "gacha";
+  | "gacha"
+  | "prizeList";
 export type AnswerMode = "choice" | "calculationPad";
 
 /**
