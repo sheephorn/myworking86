@@ -30,7 +30,6 @@ describe('GachaScreen', () => {
 
     // Mock axios get (for points) to resolve
     vi.mocked(axios.get).mockResolvedValue({ data: { points: 1000 } });
-
     // Reset resolvers
     imageLoadResolver = null;
     imageErrorResolver = null;

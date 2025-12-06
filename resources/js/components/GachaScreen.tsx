@@ -63,7 +63,6 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
   useEffect(() => {
     getPoints().then(setPoints).catch(console.error);
   }, []);
-
   // Use a ref to store the image loading promise so we can check it in useEffect
   const imageLoadPromiseRef = useRef<Promise<void> | null>(null);
 
