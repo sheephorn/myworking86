@@ -31,6 +31,8 @@ import {
 import { setUserProperties, trackQuizComplete } from "../utils/analytics";
 import { GRADES } from "../constants";
 import { loginUser } from "../utils/auth";
+import { awardPoints } from "../utils/pointApi";
+import ServerFailureModal from "../components/ui/ServerFailureModal";
 
 /**
  * アプリケーションのメインコンポーネント。
@@ -52,6 +54,8 @@ export default function Home() {
     const [isAnswerModeModalOpen, setIsAnswerModeModalOpen] = useState(false);
     const [isUserSwitchModalOpen, setIsUserSwitchModalOpen] = useState(false);
     const [quizKey, setQuizKey] = useState(0);
+    const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
+    const [isServerFailureModalOpen, setIsServerFailureModalOpen] = useState(false);
 
     useEffect(() => {
         // Track user properties if profile is loaded on mount
@@ -83,7 +87,7 @@ export default function Home() {
         setIsAnswerModeModalOpen(false);
     };
 
-    const handleQuizComplete = (score: number, time: number) => {
+    const handleQuizComplete = async (score: number, time: number) => {
         setFinalScore(score);
         setFinalTime(time);
 
@@ -109,6 +113,15 @@ export default function Home() {
 
         // Send analytics
         trackQuizComplete(level.id, score, time);
+
+        try {
+            const result = await awardPoints(level.id, score);
+            setEarnedPoints(result.earned_points);
+        } catch (e) {
+            console.error("Failed to award points", e);
+            setEarnedPoints(null);
+            setIsServerFailureModalOpen(true);
+        }
 
         setScreen("result");
     };
@@ -188,6 +201,10 @@ export default function Home() {
         setUsers(getUsers());
     };
 
+    const handleCloseServerFailure = () => {
+        setIsServerFailureModalOpen(false);
+    };
+
     return (
         <div className="flex flex-col items-center pt-1 min-h-screen bg-blue-50">
             <div className={`w-full p-6 ${screen === 'quiz' ? 'max-w-7xl' : 'max-w-md'}`}>
@@ -248,9 +265,14 @@ export default function Home() {
                         onRestart={handleRestart}
                         onGoToTop={handleGoToTop}
                         medalCriteria={level.medalCriteria}
+                        earnedPoints={earnedPoints}
                     />
                 )}
             </div>
+            <ServerFailureModal
+                isOpen={isServerFailureModalOpen}
+                onClose={handleCloseServerFailure}
+            />
             <AnswerModeModal
                 isOpen={isAnswerModeModalOpen}
                 onSelect={handleAnswerModeSelect}

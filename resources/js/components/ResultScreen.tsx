@@ -25,6 +25,10 @@ interface ResultScreenProps {
    * メダル獲得条件（オプション）
    */
   medalCriteria?: MedalCriteria;
+  /**
+   * 獲得したポイント（オプション）
+   */
+  earnedPoints?: number | null;
 }
 
 /**
@@ -32,7 +36,7 @@ interface ResultScreenProps {
  * スコア、経過時間、評価メッセージ、および獲得したメダルを表示します。
  * @param {ResultScreenProps} props - コンポーネントのprops
  */
-export default function ResultScreen({ score, finalTime, onRestart, onGoToTop, medalCriteria }: ResultScreenProps) {
+export default function ResultScreen({ score, finalTime, onRestart, onGoToTop, medalCriteria, earnedPoints }: ResultScreenProps) {
   let message = 'がんばったね！ つぎはもっといけるよ！ 💪';
   let messageClass = 'text-xl font-bold text-brand-blue';
 
@@ -64,6 +68,15 @@ export default function ResultScreen({ score, finalTime, onRestart, onGoToTop, m
           <p className="text-slate-500 font-bold mb-1">かかったじかん</p>
           <div className="text-4xl font-black text-slate-700 font-mono">{formatTime(finalTime)}</div>
         </div>
+
+        {earnedPoints !== undefined && earnedPoints !== null && (
+          <div className="mb-4 pt-4 border-t-2 border-slate-200 animate-pop-in">
+            <p className="text-slate-500 font-bold mb-1">かくとくポイント</p>
+            <div className="text-4xl font-black text-brand-yellow">
+              {earnedPoints} <span className="text-2xl text-slate-400">pt</span>
+            </div>
+          </div>
+        )}
 
         <p className={messageClass}>{message}</p>
       </div>

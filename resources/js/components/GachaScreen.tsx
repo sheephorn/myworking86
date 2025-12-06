@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { GachaItem, pullGacha } from '../gachaData';
+import { getPoints } from '../utils/pointApi';
 
 interface GachaScreenProps {
   onBack: () => void;
@@ -57,23 +58,45 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
   const [result, setResult] = useState<GachaItem | null>(null);
   const [visualType, setVisualType] = useState<VisualType>('normal');
   const [capsuleColor, setCapsuleColor] = useState<string>('bg-blue-500');
+  const [points, setPoints] = useState<number>(0);
 
-  const handlePull = async () => {
+  useEffect(() => {
+    getPoints().then(setPoints).catch(console.error);
+  }, []);
+  // Use a ref to store the image loading promise so we can check it in useEffect
+  const imageLoadPromiseRef = useRef<Promise<void> | null>(null);
+
+  const handlePull = () => {
     // 1. Determine Result
     const item = pullGacha();
     setResult(item);
 
-    // Register Prize via API
-    try {
-      await axios.post('/api/user/prizes', {
-        prize_id: item.id,
-        rarity: item.rarity,
+    // Register Prize via API - FIRE AND FORGET (Option A)
+    // We do NOT await this, so the animation starts immediately.
+    axios.post('/api/user/prizes', {
+      prize_id: item.id,
+      rarity: item.rarity,
+    }).catch(error => {
+      // Log error silently, do not interrupt the child's experience
+      console.error("Failed to register prize (background):", error);
+    });
+
+    // 2. Start Image Preloading (Option B)
+    if (item.imageUrl && item.imageUrl.startsWith('/')) {
+      imageLoadPromiseRef.current = new Promise((resolve) => {
+        const img = new Image();
+        img.src = item.imageUrl!;
+        img.onload = () => resolve();
+        img.onerror = () => {
+          console.error("Failed to preload image:", item.imageUrl);
+          resolve(); // Resolve anyway to not block the animation forever
+        };
       });
-    } catch (error) {
-      console.error("Failed to register prize:", error);
+    } else {
+      imageLoadPromiseRef.current = Promise.resolve();
     }
 
-    // 2. Determine Visuals
+    // 3. Determine Visuals
     let visual: VisualType = 'normal';
     if (item.rarity === 'UR') {
       visual = 'rainbow';
@@ -92,29 +115,42 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
     }
     setVisualType(visual);
 
-    // 3. Start Animation Sequence
+    // 4. Start Animation Sequence Immediately
     setStatus('dropping');
   };
 
   // Animation Sequence Logic
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+
     if (status === 'dropping') {
-      const timer = setTimeout(() => setStatus('shaking'), 1000); // 1s drop
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setStatus('shaking'), 1000); // 1s drop
     }
-    if (status === 'shaking') {
-      const timer = setTimeout(() => setStatus('opening'), 3000); // 3s shake
-      return () => clearTimeout(timer);
+    else if (status === 'shaking') {
+      // Wait for BOTH the minimum animation time (3s) AND the image to load
+      const minAnimationTime = new Promise<void>(resolve => {
+        timer = setTimeout(() => resolve(), 3000);
+      });
+
+      const imageLoad = imageLoadPromiseRef.current || Promise.resolve();
+
+      Promise.all([minAnimationTime, imageLoad]).then(() => {
+        setStatus('opening');
+      });
     }
-    if (status === 'opening') {
-      const timer = setTimeout(() => setStatus('result'), 800); // 0.8s for opening animation
-      return () => clearTimeout(timer);
+    else if (status === 'opening') {
+      timer = setTimeout(() => setStatus('result'), 800); // 0.8s for opening animation
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [status]);
 
   const handleReset = () => {
     setStatus('idle');
     setResult(null);
+    imageLoadPromiseRef.current = null;
   };
 
   // Helper functions for Result Display
@@ -311,6 +347,10 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
             {status === 'idle' ? 'ガチャをまわす' : '......'}
           </button>
         )}
+      </div>
+
+      <div className="mt-6 text-slate-600 font-bold text-xl bg-white/80 px-6 py-2 rounded-full shadow-sm border-2 border-slate-100">
+        しょじポイント: <span className="text-2xl text-brand-yellow font-black">{points}</span> pt
       </div>
     </div>
   );
