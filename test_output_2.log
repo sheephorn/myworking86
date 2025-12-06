@@ -1,8 +1,0 @@
-
-   PASS  Tests\Feature\PointSystemTest
-  ✓ award points calculates correctly                                    0.30s
-  ✓ award points decay logic                                             0.04s
-  ✓ daily reset logic                                                    0.02s
-
-  Tests:    3 passed (9 assertions)
-  Duration: 0.43s
