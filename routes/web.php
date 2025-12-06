@@ -4,8 +4,14 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PointController;
 
 Route::post('/login', [UserController::class, 'login']);
+
+Route::middleware('auth')->group(function () {
+    Route::post('/api/points/award', [PointController::class, 'award']);
+    Route::get('/api/points', [PointController::class, 'show']);
+});
 
 Route::get('/', function () {
     return Inertia::render('Home');

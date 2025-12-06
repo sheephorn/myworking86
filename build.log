@@ -1,0 +1,52 @@
+
+> build
+> vite build
+
+vite v7.1.5 building for production...
+[plugin @laravel/vite-plugin-wayfinder] Types generated for actions, routes, form variants
+transforming...
+✓ 2742 modules transformed.
+rendering chunks...
+computing gzip size...
+public/build/manifest.json                             14.34 kB │ gzip:   1.55 kB
+public/build/assets/app-zIV6jkG7.css                  120.41 kB │ gzip:  19.65 kB
+public/build/assets/index-8DY1Zazw.js                   0.09 kB │ gzip:   0.10 kB
+public/build/assets/check-qbPpgZoK.js                   0.31 kB │ gzip:   0.25 kB
+public/build/assets/loader-circle-BwObmX43.js           0.32 kB │ gzip:   0.27 kB
+public/build/assets/index-BCC4ahRc.js                   0.37 kB │ gzip:   0.22 kB
+public/build/assets/input-error-CSNMMkK-.js             0.44 kB │ gzip:   0.32 kB
+public/build/assets/spinner-CSgxrf0p.js                 0.46 kB │ gzip:   0.33 kB
+public/build/assets/index-B-1T8Igf.js                   0.57 kB │ gzip:   0.40 kB
+public/build/assets/text-link-CdZoT6Uw.js               0.61 kB │ gzip:   0.40 kB
+public/build/assets/PrizeList-CeN7KX5x.js               0.75 kB │ gzip:   0.46 kB
+public/build/assets/label-B4I3nCUj.js                   0.84 kB │ gzip:   0.53 kB
+public/build/assets/input-VUN4E1ar.js                   1.05 kB │ gzip:   0.59 kB
+public/build/assets/verify-email-D0ocis3e.js            1.39 kB │ gzip:   0.77 kB
+public/build/assets/index-DZxzsgmi.js                   1.50 kB │ gzip:   0.52 kB
+public/build/assets/confirm-password-D43vg2-_.js        1.50 kB │ gzip:   0.76 kB
+public/build/assets/auth-layout-BWRfVkFp.js             1.82 kB │ gzip:   0.85 kB
+public/build/assets/forgot-password-PYUnnk27.js         2.07 kB │ gzip:   0.99 kB
+public/build/assets/reset-password-CdEn-hAa.js          2.37 kB │ gzip:   0.99 kB
+public/build/assets/dashboard-DA3xn9Mt.js               2.61 kB │ gzip:   0.95 kB
+public/build/assets/index-vZYIBGLo.js                   2.76 kB │ gzip:   0.71 kB
+public/build/assets/index-C4J_hXM0.js                   2.80 kB │ gzip:   0.85 kB
+public/build/assets/register-BULHDxB2.js                2.83 kB │ gzip:   1.11 kB
+public/build/assets/two-factor-challenge-34WjZlSG.js    2.92 kB │ gzip:   1.38 kB
+public/build/assets/appearance-Dsu8xmZN.js              3.22 kB │ gzip:   1.43 kB
+public/build/assets/password-oXPHygtO.js                3.90 kB │ gzip:   1.38 kB
+public/build/assets/dialog-BFdjrNF4.js                  3.99 kB │ gzip:   1.18 kB
+public/build/assets/index-DmMlQonR.js                   4.13 kB │ gzip:   0.83 kB
+public/build/assets/layout-BWZL3gAV.js                  4.68 kB │ gzip:   1.72 kB
+public/build/assets/index-DQbjHJhm.js                   4.91 kB │ gzip:   2.07 kB
+public/build/assets/login-DI46Xq7h.js                   7.07 kB │ gzip:   2.93 kB
+public/build/assets/profile-DwGozVg0.js                 7.07 kB │ gzip:   2.46 kB
+public/build/assets/use-two-factor-auth-B2z1ap2U.js    13.68 kB │ gzip:   5.50 kB
+public/build/assets/transition-B4LRZScV.js             14.15 kB │ gzip:   5.63 kB
+public/build/assets/two-factor-DZeO3YqY.js             22.02 kB │ gzip:   6.95 kB
+public/build/assets/PrizeListScreen-BQTOJ_ZN.js        26.29 kB │ gzip:   7.04 kB
+public/build/assets/app-logo-icon-DT9fcAFN.js          31.73 kB │ gzip:  10.75 kB
+public/build/assets/welcome-BGEN1ASf.js                50.15 kB │ gzip:   9.55 kB
+public/build/assets/Home-COlFXn8h.js                   80.27 kB │ gzip:  23.99 kB
+public/build/assets/app-layout-DUh-ejI6.js            122.68 kB │ gzip:  38.69 kB
+public/build/assets/app-Cv0FuD6Z.js                   350.57 kB │ gzip: 114.47 kB
+✓ built in 14.29s

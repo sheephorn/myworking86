@@ -1,0 +1,5 @@
+npm warn exec The following package was not found and will be installed: playwright@1.57.0
+Error: Cannot find package '@playwright/test' imported from /app/tests/Frontend/e2e/verify_points.spec.ts
+Error: No tests found.
+Make sure that arguments are regular expressions matching test files.
+You may need to escape symbols like "$" or "*" and quote the arguments.
