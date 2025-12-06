@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GachaItem, pullGacha } from '../gachaData';
+import { getPoints } from '../utils/pointApi';
 
 interface GachaScreenProps {
   onBack: () => void;
@@ -57,6 +58,11 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
   const [result, setResult] = useState<GachaItem | null>(null);
   const [visualType, setVisualType] = useState<VisualType>('normal');
   const [capsuleColor, setCapsuleColor] = useState<string>('bg-blue-500');
+  const [points, setPoints] = useState<number>(0);
+
+  useEffect(() => {
+    getPoints().then(setPoints).catch(console.error);
+  }, []);
 
   const handlePull = async () => {
     // 1. Determine Result
@@ -311,6 +317,10 @@ const GachaScreen: React.FC<GachaScreenProps> = ({ onBack }) => {
             {status === 'idle' ? 'ガチャをまわす' : '......'}
           </button>
         )}
+      </div>
+
+      <div className="mt-6 text-slate-600 font-bold text-xl bg-white/80 px-6 py-2 rounded-full shadow-sm border-2 border-slate-100">
+        しょじポイント: <span className="text-2xl text-brand-yellow font-black">{points}</span> pt
       </div>
     </div>
   );
